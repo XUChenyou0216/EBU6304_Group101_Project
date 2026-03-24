@@ -66,7 +66,7 @@ ta-recruitment/
 ### Branch Workflow
 1. `git checkout -b feature/xxx` from main
 2. Daily commits
-3. **3/27**: Sprint 1 freeze → PR → merge as v1.0
+3. **3/30**: Sprint 1 freeze → PR → merge as v1.0
 4. **4/9**: Sprint 2 freeze → PR → merge as v2.0
 5. **4/12**: Demo & Viva
 
