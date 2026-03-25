@@ -67,17 +67,17 @@ ta-recruitment/
 
 ## Team Assignment — Phase 2
 
-| Person | Branch | Sprint 1 (v1: 3/30) | Sprint 2 (v2: 4/12) |
-|--------|--------|---------------------|---------------------|
-| P1 | feature/scaffold | Project scaffold, FileManager, data format | Integration, merge, demo prep |
-| P2 | feature/auth | Registration, Login, Password Recovery (US-A06) | TA Profile + CV Upload (US-TA01, US-TA02) |
-| P3 | feature/access | Role Permission / AuthFilter (US-D02) | TA Apply + Status (US-TA04, US-TA05) |
-| P4 | feature/jobs | TA View Jobs (US-TA03) | MO Post & Edit Jobs (US-MO01) |
-| P5 | feature/mo | MO View CV (US-MO03) | MO Review + Update Status (US-MO02, US-MO04) |
-| P6 | feature/test | Form Validation (US-T04) | End-to-End Test (US-T01) + Export (US-C02) |
+| Person | Sprint 1 (v1: 3/30) | Sprint 2 (v2: 4/12) |
+|--------|---------------------|---------------------|
+| P1 | Project scaffold, FileManager, data format | Integration, merge, demo prep |
+| P2 | Registration, Login, Password Recovery (US-A06) | TA Profile + CV Upload (US-TA01, US-TA02) |
+| P3 | Role Permission / AuthFilter (US-D02) | TA Apply + Status (US-TA04, US-TA05) |
+| P4 | TA View Jobs (US-TA03) | MO Post & Edit Jobs (US-MO01) |
+| P5 | MO View CV (US-MO03) | MO Review + Update Status (US-MO02, US-MO04) |
+| P6 | Form Validation (US-T04) | End-to-End Test (US-T01) + Export (US-C02) |
 
 ### Branch Workflow
-1. `git checkout -b feature/xxx` from main
+1. `git checkout -your branch` from main
 2. Daily commits
 3. **3/30**: Sprint 1 freeze → PR → merge as v1.0
 4. **4/9**: Sprint 2 freeze → PR → merge as v2.0
