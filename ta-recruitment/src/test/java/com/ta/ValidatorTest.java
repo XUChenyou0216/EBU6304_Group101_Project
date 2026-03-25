@@ -54,7 +54,7 @@ public class ValidatorTest {
         totalTests++;
 
         System.out.println("\n========== 测试结束 ==========");
-        System.out.printf("总计测试: %d | 通过: %d | 失败: %d%n", totalTests, passedTests, (totalTests - passedTests));
+        System.out.printf("总计测试 : %d | 通过: %d | 失败: %d%n", totalTests, passedTests, (totalTests - passedTests));
 
         if (passedTests == totalTests) {
             System.out.println("结论：US-T04 的核心逻辑通过终端验证，数据完整性得到保障。");
