@@ -11,6 +11,9 @@
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
 
+    <%
+        // Backend API calls skipped for UI testing
+    %>
     <div class="page-header" style="align-items: center;">
         <div>
             <h1>Job Posts</h1>

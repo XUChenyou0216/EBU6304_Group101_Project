@@ -21,10 +21,6 @@
                 <h1>Post New TA Job</h1>
                 <p>Create a new Teaching Assistant position for your module</p>
             </div>
-            <div style="display:flex;gap:12px;">
-                <button type="button" class="btn btn-secondary">Save Draft</button>
-                <button type="submit" class="btn btn-primary" style="background:#2b4acb;">Publish Job</button>
-            </div>
         </div>
 
         <% if (request.getAttribute("error") != null) { %>
@@ -81,6 +77,34 @@
                 <div class="form-group" style="margin-bottom:0;">
                     <label>Key Duties <span style="color:#2b4acb;">*</span></label>
                     <textarea name="keyDuties" rows="5" required placeholder="List the main responsibilities and tasks..."></textarea>
+                </div>
+            </div>
+
+            <!-- Required Skills and Qualifications -->
+            <div class="card" style="padding: 32px 32px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <h4 style="font-size: 16px; font-weight: 700; padding-bottom: 20px; border-bottom: 1px solid var(--border-solid); margin-bottom: 24px;">Required Skills and Qualifications</h4>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Required Skills <span style="color:#2b4acb;">*</span></label>
+                    <textarea name="requiredSkills" rows="4" required placeholder="List the skills and qualifications required..."></textarea>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:8px;">Include both technical skills and soft skills</div>
+                </div>
+            </div>
+
+            <!-- Eligibility Requirements -->
+            <div class="card" style="padding: 32px 32px; border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <h4 style="font-size: 16px; font-weight: 700; padding-bottom: 20px; border-bottom: 1px solid var(--border-solid); margin-bottom: 24px;">Eligibility Requirements</h4>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label>Eligibility Restrictions <span style="color:#2b4acb;">*</span></label>
+                    <textarea name="eligibility" rows="4" required placeholder="Specify any eligibility criteria..."></textarea>
+                    <div style="font-size:12px; color:var(--text-secondary); margin-top:8px;">Include year of study, GPA requirements, prerequisite courses, etc.</div>
+                </div>
+            </div>
+
+            <div style="padding-top: 24px; border-top: 1px solid var(--border-solid); display:flex; justify-content:space-between; align-items:center; margin-top: 8px;">
+                <a href="${pageContext.request.contextPath}/mo/jobs.jsp" style="color:var(--text-dark);font-weight:600;text-decoration:none;font-size:15px;padding-left:10px;">Cancel</a>
+                <div style="display:flex;gap:12px;">
+                    <button type="button" class="btn btn-outline-primary" style="padding:10px 24px;font-weight:600;border-radius:8px;background:#fff;">Save Draft</button>
+                    <button type="submit" class="btn btn-primary" style="background:#2b4acb;padding:10px 24px;font-weight:600;border-radius:8px;">Publish Job Posting</button>
                 </div>
             </div>
 
