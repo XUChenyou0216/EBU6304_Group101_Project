@@ -50,4 +50,22 @@ public class Validator {
         if (!date.matches("\\d{4}-\\d{2}-\\d{2}")) return field + " format: yyyy-MM-dd.";
         return null;
     }
+
+    /**
+     * 针对职位发布（Job Posting）的综合校验
+     * 满足 AC: 招聘名额不能为负数或字母，且必填项不能为空
+     */
+    public static String validateJob(String moduleName, String vacancies, String deadline) {
+        // 校验模块名称（必填）
+        String err = requireNonEmpty(moduleName, "Module Name");
+        if (err != null) return err;
+
+        // 校验招聘名额（必须是正整数）
+        err = validatePositiveInt(vacancies, "Vacancies");
+        if (err != null) return err;
+
+        // 校验截止日期（必填）
+        err = requireNonEmpty(deadline, "Deadline");
+        return err;
+    }
 }

@@ -53,6 +53,42 @@ public class ValidatorTest {
         }
         totalTests++;
 
+        System.out.println("\n[测试] 职位发布校验 (Job Posting Validation)...");
+
+        // 1. 测试名额为字母 (Acceptance Criteria 2)
+        if (runTest("职位校验 - 名额包含字母",
+                Validator.validateJob("Software Engineering", "abc", "2026-06-01"), true)) passedTests++;
+        totalTests++;
+
+        // 2. 测试名额为负数 (Acceptance Criteria 2)
+        if (runTest("职位校验 - 名额为负数",
+                Validator.validateJob("Computer Vision", "-5", "2026-06-01"), true)) passedTests++;
+        totalTests++;
+
+        // 3. 测试必填项缺失 (Acceptance Criteria 1)
+        if (runTest("职位校验 - 模块名为空",
+                Validator.validateJob("", "10", "2026-06-01"), true)) passedTests++;
+        totalTests++;
+
+        // 4. 合法职位数据
+        if (runTest("职位校验 - 合法数据",
+                Validator.validateJob("AI Basics", "3", "2026-05-20"), false)) passedTests++;
+        totalTests++;
+
+        // --- 模拟拦截逻辑验证 (Acceptance Criteria 3) ---
+        System.out.println("\n[模拟拦截测试]：尝试发布名额非法的职位...");
+        String invalidVacancies = "Zero";
+        String jobTitle = "Database Systems";
+
+        String jobError = Validator.validateJob(jobTitle, invalidVacancies, "2026-12-31");
+        if (jobError != null) {
+            System.out.println(">>> 成功拦截非法职位: [" + jobError + "]。写入流程已终止，jobs.csv 保持安全。");
+            passedTests++;
+        } else {
+            System.err.println(">>> 错误：非法职位数据未被拦截！");
+        }
+        totalTests++;
+
         System.out.println("\n========== 测试结束 ==========");
         System.out.printf("总计测试 : %d | 通过: %d | 失败: %d%n", totalTests, passedTests, (totalTests - passedTests));
 
@@ -60,6 +96,7 @@ public class ValidatorTest {
             System.out.println("结论：US-T04 的核心逻辑通过终端验证，数据完整性得到保障。");
         }
     }
+
 
     private static boolean runTest(String testName, String result, boolean expectError) {
         boolean actualError = (result != null);
