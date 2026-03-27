@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Job - TA Recruitment System</title>
+    <title>Update Job - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
 
     <div class="breadcrumb" style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">
-        Job Postings &rarr; <span style="font-weight:600;color:var(--text-dark);">Post New Job</span>
+        Job Postings &rarr; <span style="font-weight:600;color:var(--text-dark);">Edit Job</span>
     </div>
 
     <form action="${pageContext.request.contextPath}/mo/post-job" method="post">
