@@ -1,18 +1,5 @@
 # TA Recruitment System
 
-## Group Name-list
-
-- ZhaoWantong: 2025110949  (Support TA)
-- XUChenyou0216: 231223782 (Lead in Phase1/Member)
-- NancyLis1: 231223793 (Member/Lead in Phase2)
-- Aurora050214: 231223519 (Member)
-- Lar-me-s: 231223748 (Member)
-- Valentina_Yang: 231224044 (Member)
-- lylybay: 231224033 (Member)
-
-Software Engineering group project for `EBU6304` .
-# TA Recruitment System
-
 BUPT International School Teaching Assistant Recruitment System
 **EBU6304 — Software Engineering Group Project**
 
@@ -68,7 +55,7 @@ ta-recruitment/
 ## Team Assignment — Phase 2
 
 | Person | Sprint 1 (v1: 3/30) | Sprint 2 (v2: 4/12) |
-|--------|---------------------|---------------------|
+|----|-|---------------------|
 | P1 | Project scaffold, FileManager, data format | Integration, merge, demo prep |
 | P2 | Registration, Login, Password Recovery (US-A06) | TA Profile + CV Upload (US-TA01, US-TA02) |
 | P3 | Role Permission / AuthFilter (US-D02) | TA Apply + Status (US-TA04, US-TA05) |
