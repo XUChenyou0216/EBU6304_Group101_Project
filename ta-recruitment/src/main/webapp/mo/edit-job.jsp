@@ -4,22 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Job - TA Recruitment System</title>
+    <title>Edit Job - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
 
     <div class="breadcrumb" style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">
-        Job Postings &rarr; <span style="font-weight:600;color:var(--text-dark);">Post New Job</span>
+        Job Postings &rarr; <span style="font-weight:600;color:var(--text-dark);">Edit Job</span>
     </div>
 
     <form action="${pageContext.request.contextPath}/mo/post-job" method="post">
         
         <div class="page-header" style="align-items:flex-start;">
             <div>
-                <h1>Post New TA Job</h1>
-                <p>Create a new Teaching Assistant position for your module</p>
+                <h1>Edit TA Job</h1>
+                <p>Update the Teaching Assistant position details for your module</p>
             </div>
         </div>
 
@@ -104,7 +104,7 @@
                 <a href="${pageContext.request.contextPath}/mo/jobs.jsp" style="color:var(--text-dark);font-weight:600;text-decoration:none;font-size:15px;padding-left:10px;">Cancel</a>
                 <div style="display:flex;gap:12px;">
                     <button type="button" class="btn btn-outline-primary" style="padding:10px 24px;font-weight:600;border-radius:8px;background:#fff;">Save Draft</button>
-                    <button type="submit" class="btn btn-primary" style="background:#2b4acb;padding:10px 24px;font-weight:600;border-radius:8px;">Publish Job Posting</button>
+                    <button type="submit" class="btn btn-primary" style="background:#2b4acb;padding:10px 24px;font-weight:600;border-radius:8px;">Save Changes</button>
                 </div>
             </div>
 
