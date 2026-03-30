@@ -1,0 +1,3 @@
+jobId,moUserId,moduleName,description,requirements,vacancies,deadline,status,createdDate
+J001,U002,"EBU6304 Software Engineering","Assist with lab sessions and marking","Java programming; Git experience",2,2026-04-30,OPEN,2026-03-20
+J002,U002,"EBU5476 Computer Networks","Help with tutorials and invigilation","Networking knowledge; Good communication",2,2026-04-15,OPEN,2026-03-20

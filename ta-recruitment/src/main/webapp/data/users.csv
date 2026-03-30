@@ -1,0 +1,10 @@
+userId,username,passwordHash,role,email,securityQuestion,securityAnswer,status
+U001,admin,8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918,ADMIN,admin@bupt.edu.cn,pet,admindog,ACTIVE
+U002,prof_wang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,wang@bupt.edu.cn,city,beijing,ACTIVE
+U003,student_li,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,li@bupt.edu.cn,school,bupt,ACTIVE
+U004,chen_ming,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,chen@bupt.edu.cn,school,bupt,ACTIVE
+U005,wang_fang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,fang@bupt.edu.cn,school,bupt,ACTIVE
+U006,liu_yang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,liu@bupt.edu.cn,school,bupt,ACTIVE
+U007,zhao_qian,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,zhao@bupt.edu.cn,school,bupt,ACTIVE
+U008,sun_lei,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,sun@bupt.edu.cn,school,bupt,ACTIVE
+U009,zhou_jing,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,zhou@bupt.edu.cn,school,bupt,ACTIVE

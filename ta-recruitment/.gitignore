@@ -1,0 +1,14 @@
+target/
+*.class
+*.war
+*.jar
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.DS_Store
+Thumbs.db
+src/main/webapp/uploads/*.pdf
+src/main/webapp/uploads/*.docx
