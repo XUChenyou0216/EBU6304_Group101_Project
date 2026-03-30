@@ -3,14 +3,15 @@
 ## Group Name-list
 
 - ZhaoWantong: 2025110949  (Support TA)
-- XUChenyou0216: 231223782 (Lead in Phase1/Member)
-- NancyLis1: 231223793 (Member/Lead in Phase2)
+- XUChenyou0216: 231223782 (Lead in Phase1 / Member)
+- NancyLis1: 231223793 (Member / Lead in Phase2)
 - Aurora050214: 231223519 (Member)
 - Lar-me-s: 231223748 (Member)
 - Valentina_Yang: 231224044 (Member)
 - lylybay: 231224033 (Member)
 
 Software Engineering group project for `EBU6304` .
+
 # TA Recruitment System
 
 BUPT International School Teaching Assistant Recruitment System
