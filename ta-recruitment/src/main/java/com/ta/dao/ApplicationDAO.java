@@ -20,6 +20,13 @@ public class ApplicationDAO {
         return apps;
     }
 
+    public Application findById(String applicationId) {
+        for (Application a : findAll()) {
+            if (a.getApplicationId().equals(applicationId)) return a;
+        }
+        return null;
+    }
+
     public List<Application> findByTa(String taUserId) {
         return findAll().stream().filter(a -> a.getTaUserId().equals(taUserId)).collect(Collectors.toList());
     }

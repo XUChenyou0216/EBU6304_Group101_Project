@@ -9,11 +9,6 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.io.File;
 
-/**
- * Runs once when the application starts.
- * Ensures data directory and CSV files exist with headers and sample data.
- * This fixes the issue where mvn tomcat7:run does not copy CSV files to target/.
- */
 @WebListener
 public class AppInitializer implements ServletContextListener {
 
@@ -22,13 +17,10 @@ public class AppInitializer implements ServletContextListener {
         String realPath = sce.getServletContext().getRealPath("/");
         String dataDir = realPath + "data";
 
-        // Create data directory if missing
         new File(dataDir).mkdirs();
-
-        // Create uploads directory if missing
         new File(realPath + "uploads").mkdirs();
 
-        // Initialize users.csv with sample accounts if it doesn't exist
+        // ===== users.csv =====
         File usersFile = new File(dataDir + "/users.csv");
         if (!usersFile.exists() || usersFile.length() == 0) {
             System.out.println("[INIT] Creating users.csv with sample accounts...");
@@ -38,9 +30,13 @@ public class AppInitializer implements ServletContextListener {
                 "U002,prof_wang," + PasswordUtil.hash("password") + ",MO,wang@bupt.edu.cn,city,beijing,ACTIVE");
             FileManager.appendRow(usersFile.getPath(), User.CSV_HEADER,
                 "U003,student_li," + PasswordUtil.hash("password") + ",TA,li@bupt.edu.cn,school,bupt,ACTIVE");
+            FileManager.appendRow(usersFile.getPath(), User.CSV_HEADER,
+                "U004,student_zhang," + PasswordUtil.hash("password") + ",TA,zhang@bupt.edu.cn,pet,cat,ACTIVE");
+            FileManager.appendRow(usersFile.getPath(), User.CSV_HEADER,
+                "U005,prof_chen," + PasswordUtil.hash("password") + ",MO,chen@bupt.edu.cn,city,shanghai,ACTIVE");
         }
 
-        // Initialize jobs.csv if missing
+        // ===== jobs.csv =====
         File jobsFile = new File(dataDir + "/jobs.csv");
         if (!jobsFile.exists() || jobsFile.length() == 0) {
             System.out.println("[INIT] Creating jobs.csv with sample data...");
@@ -48,27 +44,41 @@ public class AppInitializer implements ServletContextListener {
                 "J001,U002,\"EBU6304 Software Engineering\",\"Assist with lab sessions and marking\",\"Java programming; Git experience\",2,2026-04-30,OPEN,2026-03-20");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
                 "J002,U002,\"EBU5476 Computer Networks\",\"Help with tutorials and invigilation\",\"Networking knowledge; Good communication\",1,2026-04-15,OPEN,2026-03-20");
+            FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
+                "J003,U002,\"EBU6305 Data Mining\",\"Support practical sessions on data analysis\",\"Python; Machine learning basics\",3,2026-05-10,OPEN,2026-03-25");
+            FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
+                "J004,U005,\"EBU5302 Operating Systems\",\"Lab assistance and exam invigilation\",\"C programming; Linux experience\",2,2026-04-20,OPEN,2026-03-22");
+            FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
+                "J005,U002,\"EBU6303 Internet of Things\",\"Assist with IoT lab setup and demos\",\"Arduino; Raspberry Pi; Sensor networks\",1,2026-03-15,CLOSED,2026-02-20");
         }
 
-        // Initialize applications.csv if missing (header only)
-        File appsFile = new File(dataDir + "/applications.csv");
-        if (!appsFile.exists() || appsFile.length() == 0) {
-            System.out.println("[INIT] Creating applications.csv...");
-            FileManager.writeAll(appsFile.getPath(), Application.CSV_HEADER, java.util.Collections.emptyList());
-        }
-
-        // Initialize profiles.csv if missing (header only)
+        // ===== profiles.csv =====
         File profilesFile = new File(dataDir + "/profiles.csv");
         if (!profilesFile.exists() || profilesFile.length() == 0) {
-            System.out.println("[INIT] Creating profiles.csv...");
-            FileManager.writeAll(profilesFile.getPath(), TAProfile.CSV_HEADER, java.util.Collections.emptyList());
+            System.out.println("[INIT] Creating profiles.csv with sample data...");
+            FileManager.appendRow(profilesFile.getPath(), TAProfile.CSV_HEADER,
+                "U003,231220001,Li Student,Computer Science,3,13800138000,");
+            FileManager.appendRow(profilesFile.getPath(), TAProfile.CSV_HEADER,
+                "U004,231220002,Zhang Wei,Software Engineering,2,13900139000,");
+        }
+
+        // ===== applications.csv =====
+        File appsFile = new File(dataDir + "/applications.csv");
+        if (!appsFile.exists() || appsFile.length() == 0) {
+            System.out.println("[INIT] Creating applications.csv with sample data...");
+            FileManager.appendRow(appsFile.getPath(), Application.CSV_HEADER,
+                "APP001,U003,J001,SUBMITTED,2026-03-25,");
+            FileManager.appendRow(appsFile.getPath(), Application.CSV_HEADER,
+                "APP002,U004,J001,UNDER_REVIEW,2026-03-26,Good candidate");
+            FileManager.appendRow(appsFile.getPath(), Application.CSV_HEADER,
+                "APP003,U003,J002,SUBMITTED,2026-03-27,");
+            FileManager.appendRow(appsFile.getPath(), Application.CSV_HEADER,
+                "APP004,U004,J003,ACCEPTED,2026-03-28,Excellent skills");
         }
 
         System.out.println("[INIT] Data directory ready: " + dataDir);
     }
 
     @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        // nothing to clean up
-    }
+    public void contextDestroyed(ServletContextEvent sce) {}
 }
