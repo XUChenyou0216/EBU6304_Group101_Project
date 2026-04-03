@@ -40,7 +40,20 @@ public class UploadCvServlet extends HttpServlet {
             return;
         }
 
-        String submitted = part.getSubmittedFileName();
+        String submitted = "";
+        String header = part.getHeader("content-disposition");
+        if (header != null) {
+            for (String content : header.split(";")) {
+                if (content.trim().startsWith("filename")) {
+                    submitted = content.substring(content.indexOf('=') + 1).trim().replace("\"", "");
+                    // 处理某些浏览器可能发送的绝对路径
+                    submitted = Paths.get(submitted).getFileName().toString();
+                    break;
+                }
+            }
+        }
+        // ------------------------------------------
+
         long size = part.getSize();
         String err = Validator.validateCvFile(submitted, size);
         if (err != null) {
@@ -50,9 +63,8 @@ public class UploadCvServlet extends HttpServlet {
         }
 
         String ext = "";
-        String base = Paths.get(submitted).getFileName().toString();
-        int dot = base.lastIndexOf('.');
-        if (dot >= 0) ext = base.substring(dot).toLowerCase();
+        int dot = submitted.lastIndexOf('.');
+        if (dot >= 0) ext = submitted.substring(dot).toLowerCase();
 
         String uploadsDir = req.getServletContext().getRealPath("/uploads");
         if (uploadsDir == null) {
