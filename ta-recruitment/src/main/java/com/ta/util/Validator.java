@@ -10,7 +10,14 @@ public class Validator {
         if (value == null || value.trim().isEmpty()) return field + " is required.";
         return null;
     }
-
+    public static String validateProfile(String studentId, String fullName, String programme, String yearOfStudy) {
+        String err;
+        if ((err = requireNonEmpty(studentId, "Student ID")) != null) return err;
+        if ((err = requireNonEmpty(fullName, "Full Name")) != null) return err;
+        if ((err = requireNonEmpty(programme, "Programme")) != null) return err;
+        if ((err = requireNonEmpty(yearOfStudy, "Year of Study")) != null) return err;
+        return null;
+    }
     public static String validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) return "Email is required.";
         if (!EMAIL_RE.matcher(email.trim()).matches()) return "Invalid email format.";
