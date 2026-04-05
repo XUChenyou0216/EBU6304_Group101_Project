@@ -54,13 +54,10 @@
                     <input type="text" name="studentId" value="<%= profile!=null?profile.getStudentId():"" %>" placeholder="e.g. 2024CS1042" required>
                 </div>
 
-                <%-- 2. Full Name (修复: 添加这个必填字段) --%>
+                <%-- 2. Full Name --%>
                 <div class="form-group">
                     <label>Full Name <span style="color:red">*</span></label>
                     <input type="text" name="fullName" value="<%= profile!=null?profile.getFullName():"" %>" placeholder="Enter your full name" required>
-                    <% if (profile == null || profile.getFullName() == null || profile.getFullName().isEmpty()) { %>
-                        <div class="mandatory-hint">❌ Full Name is required</div>
-                    <% } %>
                 </div>
 
                 <%-- 3. Programme --%>
