@@ -78,6 +78,9 @@ public class ExportAllocationServlet extends HttpServlet {
                 String taUserId      = get(app, 1);
                 String jobId         = get(app, 2);
                 String appStatus     = get(app, 3);
+
+                // 只导出 Accepted 的记录
+                if (!"ACCEPTED".equalsIgnoreCase(appStatus)) continue;
                 String appliedDate   = get(app, 4);
                 String reviewNote    = get(app, 5);
 
