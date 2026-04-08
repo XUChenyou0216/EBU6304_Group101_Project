@@ -218,9 +218,9 @@
 
             <form action="${pageContext.request.contextPath}/login" method="post">
                 <div class="field-group">
-                    <label class="field-label" for="username">Student ID / Email</label>
+                    <label class="field-label" for="username">User ID/Email</label>
                     <input class="field-input" type="text" id="username" name="username"
-                           required placeholder="Enter your Student ID or Email">
+                           required placeholder="Enter your User ID or Email">
                 </div>
 
                 <div class="field-group">
