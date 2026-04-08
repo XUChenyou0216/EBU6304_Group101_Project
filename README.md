@@ -3,18 +3,16 @@
 ## Group Name-list
 
 - ZhaoWantong: 2025110949  (Support TA)
-- XUChenyou0216: 231223782 (Lead in Phase1/Member)
-- NancyLis1: 231223793 (Member/Lead in Phase2)
+- XUChenyou0216: 231223782 (Lead in Phase1 / Member)
+- NancyLis1: 231223793 (Member / Lead in Phase2)
 - Aurora050214: 231223519 (Member)
 - Lar-me-s: 231223748 (Member)
 - Valentina_Yang: 231224044 (Member)
 - lylybay: 231224033 (Member)
 
 Software Engineering group project for `EBU6304` .
-# TA Recruitment System
 
-BUPT International School Teaching Assistant Recruitment System
-**EBU6304 — Software Engineering Group Project**
+**EBU6304 — Software Engineering Group Project | Group 101**
 
 ## Quick Start
 
@@ -22,25 +20,62 @@ BUPT International School Teaching Assistant Recruitment System
 - Java 11+
 - Maven 3.6+
 
-### Run with Embedded Tomcat
+### Run
 ```bash
 cd ta-recruitment
-mvn tomcat7:run
+mvn clean tomcat7:run
 ```
 Open: **http://localhost:8080/**
 
 ### Test Accounts
 | Username | Password | Role |
 |----------|----------|------|
-| admin | admin | ADMIN |
-| prof_wang | password | MO |
-| student_li | password | TA |
+| admin | admin | Administrator |
+| prof_wang | password | Module Organiser |
+| student_li | password | Teaching Assistant |
+| student_zhang | password | Teaching Assistant |
 
 ### Build WAR
 ```bash
 mvn clean package
-# Deploy target/ta-recruitment.war to Tomcat webapps/
+# Deploy target/ta-recruitment.war to Tomcat 9 webapps/
 ```
+
+## Features
+
+### TA (Teaching Assistant)
+- Register and login with secure password hashing (SHA-256)
+- Create and edit personal profile (student ID, programme, year of study)
+- Upload CV (PDF/DOCX, max 10MB, file type validation)
+- Browse available TA positions with status badges
+- Apply for jobs (duplicate prevention, profile check)
+- Track application status (Submitted → Under Review → Accepted/Rejected)
+
+### MO (Module Organiser)
+- Post new TA job vacancies with details and deadline
+- Edit existing job postings
+- View applicant list per job
+- Review applicant profiles and CVs
+- Update application status (accept/reject)
+- Track recruitment progress
+
+### Admin (Administrator)
+- View system statistics (total users, TAs, MOs)
+- Manage user accounts
+- Monitor TA workload
+
+### Security
+- Role-based access control (TA/MO/Admin)
+- 403 error page for unauthorized access
+- Unauthenticated users redirected to login
+- Password recovery via security questions
+
+## Technology Stack
+- **Backend**: Java 11, Servlet 4.0, JSP
+- **Frontend**: HTML, CSS, JavaScript
+- **Data Storage**: CSV files (no database, as per project requirements)
+- **Build**: Maven, Embedded Tomcat 7
+- **Version Control**: Git, GitHub
 
 ## Project Structure
 ```
@@ -49,53 +84,39 @@ ta-recruitment/
 ├── src/main/java/com/ta/
 │   ├── model/        User, Job, Application, TAProfile
 │   ├── dao/          UserDAO, JobDAO, ApplicationDAO, TAProfileDAO
-│   ├── servlet/      LoginServlet, RegisterServlet, AuthFilter, EncodingFilter
-│   ├── service/      (business logic - to be added)
+│   ├── servlet/      Login, Register, Recover, AuthFilter, Profile,
+│   │                 UploadCv, Apply, PostJob, EditJob,
+│   │                 MoApplicants, MoUpdateStatus, CvServe, AppInitializer
 │   └── util/         FileManager, PasswordUtil, SessionUtil, Validator
 ├── src/main/webapp/
-│   ├── WEB-INF/web.xml
-│   ├── css/style.css
-│   ├── login.jsp, register.jsp, recover.jsp
+│   ├── css/          style.css, applicants-review.css
 │   ├── ta/           dashboard, jobs, profile, applications
-│   ├── mo/           dashboard, jobs, post-job, applicants
+│   ├── mo/           dashboard, jobs, post-job, edit-job, applicants
 │   ├── admin/        dashboard
-│   ├── jsp/common/   header.jsp (shared navigation)
 │   ├── data/         CSV files (users, jobs, applications, profiles)
 │   └── uploads/      CV files
-└── src/test/java/    BasicTest.java
+└── src/test/java/    FullIterationFeatureTest, ValidatorTest
 ```
 
-## Team Assignment — Phase 2
+## Data Files (CSV)
+- `users.csv` — user accounts with hashed passwords
+- `jobs.csv` — TA job postings
+- `applications.csv` — job applications with status
+- `profiles.csv` — TA personal profiles with CV file paths
 
-| Person | Sprint 1 (v1: 3/30) | Sprint 2 (v2: 4/12) |
-|--------|---------------------|---------------------|
-| P1 | Project scaffold, FileManager, data format | Integration, merge, demo prep |
-| P2 | Registration, Login, Password Recovery (US-A06) | TA Profile + CV Upload (US-TA01, US-TA02) |
-| P3 | Role Permission / AuthFilter (US-D02) | TA Apply + Status (US-TA04, US-TA05) |
-| P4 | TA View Jobs (US-TA03) | MO Post & Edit Jobs (US-MO01) |
-| P5 | MO View CV (US-MO03) | MO Review + Update Status (US-MO02, US-MO04) |
-| P6 | Form Validation (US-T04) | End-to-End Test (US-T01) + Export (US-C02) |
+## Version History
+- **v1.0** (2026-03-30) — Sprint 1: Project scaffold, login/register, role-based access, job listing, form validation
+- **v2.0** (2026-04-08) — Sprint 2: TA profile/CV upload, job application, MO post/edit jobs, applicant review, status management, end-to-end testing
 
-### Branch Workflow
-1. `git checkout -your branch` from main
-2. Daily commits
-3. **3/30**: Sprint 1 freeze → PR → merge as v1.0
-4. **4/9**: Sprint 2 freeze → PR → merge as v2.0
-5. **4/12**: Demo & Viva
-
-### Commit Convention
-```
-[AUTH] Add login validation
-[DAO] Fix CSV parsing
-[MO] Implement post job servlet
-[TEST] Add e2e workflow test
-```
-
-## Data Files (CSV, no database)
-- `users.csv`: userId, username, passwordHash, role, email, securityQuestion, securityAnswer, status
-- `jobs.csv`: jobId, moUserId, moduleName, description, requirements, vacancies, deadline, status, createdDate
-- `applications.csv`: applicationId, taUserId, jobId, status, appliedDate, reviewNote
-- `profiles.csv`: userId, studentId, fullName, programme, yearOfStudy, phone, cvFilePath
+## Team — Group 101
+| Member           | QM ID |Role | Key Contributions                                                                             |
+|------------------|-------|------|-----------------------------------------------------------------------------------------------|
+| P1 (LeyanLi)     | 231223793  | Lead | Project architecture, integration, code review, demo prep (US-D01 and  US-C01)                |
+| P2 (fmy)         |231223748  |Auth + Profile | Login, register, password recovery,TA profile, CV upload  <br/>(US-A06, US-TA01 and US-TA02）  |
+| P3 (yuehanMeng)  | 231224033  |Access + Apply | Role permission control, 403 page, TA apply, application status (US-D02, US-TA04 and US-TA05） |
+| P4 (LingyueYang) | 231224044  |Job Management | TA job listing, MO post/edit jobs, job detail page <br/> (US-TA03 and US-MO01）                |
+| P5 (Shiqi-Xu)    | 231223519  |MO Management | CV viewer, applicant review, status update servlets <br/> (US-MO03, US-MO02 and US-MO04       |
+| P6 (XuChenyou)   | 231223782 |Testing | Form validation, end-to-end feature test <br/> (US-T04, US-T04 and US-C02                     |
 
 ## Prototype
 Figma: https://www.figma.com/make/aWKU1wtaNm8S1bYDUv7O76/University-TA-Recruitment-Prototype
