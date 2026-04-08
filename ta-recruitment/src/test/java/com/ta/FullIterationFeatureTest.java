@@ -47,38 +47,38 @@ public class FullIterationFeatureTest {
     }
 
     private static void runAllTests() {
-        println("========== TA Recruitment Sprint 1 + 2 全功能测试脚本 ==========");
+        println("========== TA Recruitment Sprint 1 + 2 Full Feature Test Script ==========");
 
-        run("Sprint1: 注册 / 登录 / 密码恢复 模块", FullIterationFeatureTest::testRegistrationLoginRecovery);
-        run("Sprint1: 角色权限与用户角色控制", FullIterationFeatureTest::testRolePermissionHandling);
-        run("Sprint1: 表单输入与数据校验（US-T04）", FullIterationFeatureTest::testFormValidation);
-        run("Sprint2: TA 创建个人档案与简历上传校验", FullIterationFeatureTest::testTaProfileAndCvUpload);
-        run("Sprint2: TA 浏览岗位列表（US-TA03）", FullIterationFeatureTest::testTaBrowseJobs);
-        run("Sprint2: TA 申请岗位与查看申请状态（US-TA04/05）", FullIterationFeatureTest::testTaApplyAndStatusFlow);
-        run("Sprint2: MO 发布与编辑岗位（US-MO01）", FullIterationFeatureTest::testMoPostAndEditJob);
-        run("Sprint2: MO 查看申请者与更新状态（US-MO02/MO03/MO04）", FullIterationFeatureTest::testMoReviewApplicantWorkflow);
-        run("Sprint2: 导出历史档案模拟（US-C02）", FullIterationFeatureTest::testHistoricalExportSimulation);
+        run("Sprint 1: Registration / Login / Password Recovery Modules", FullIterationFeatureTest::testRegistrationLoginRecovery);
+        run("Sprint 1: Role Permissions and User Role Control", FullIterationFeatureTest::testRolePermissionHandling);
+        run("Sprint 1: Form Input and Data Validation (US-T04)", FullIterationFeatureTest::testFormValidation);
+        run("Sprint 2: TA Profile Creation and CV Upload Validation", FullIterationFeatureTest::testTaProfileAndCvUpload);
+        run("Sprint 2: TA Browsing Job List (US-TA03)", FullIterationFeatureTest::testTaBrowseJobs);
+        run("Sprint 2: TA Job Application and Status Tracking (US-TA04/05)", FullIterationFeatureTest::testTaApplyAndStatusFlow);
+        run("Sprint 2: MO Posting and Editing Jobs (US-MO01)", FullIterationFeatureTest::testMoPostAndEditJob);
+        run("Sprint 2: MO Reviewing Applicants and Updating Status (US-MO02/03/04)", FullIterationFeatureTest::testMoReviewApplicantWorkflow);
+        run("Sprint 2: Historical Archive Export Simulation (US-C02)", FullIterationFeatureTest::testHistoricalExportSimulation);
     }
 
     private static void testRegistrationLoginRecovery() {
         User user = new User("U100", "student_x", PasswordUtil.hash("pass123"),
                 "TA", "student_x@bupt.edu.cn", "pet", "dog", "ACTIVE");
 
-        assertNotNull(user.getPasswordHash(), "密码散列后不应为空");
-        assertTrue(PasswordUtil.verify("pass123", user.getPasswordHash()), "正确密码应验证通过");
-        assertFalse(PasswordUtil.verify("wrongpass", user.getPasswordHash()), "错误密码不应通过验证");
+        assertNotNull(user.getPasswordHash(), "Password hash should not be null");
+        assertTrue(PasswordUtil.verify("pass123", user.getPasswordHash()), "Correct password should be verified");
+        assertFalse(PasswordUtil.verify("wrongpass", user.getPasswordHash()), "Incorrect password should not pass verification");
 
         UserDAO userDao = new UserDAO(DATA_DIR);
         userDao.save(user);
 
         User loaded = userDao.findByUsername("student_x");
-        assertNotNull(loaded, "保存后应可根据用户名查询到用户");
-        assertEquals("TA", loaded.getRole(), "保存用户的角色应为 TA");
-        assertEquals("student_x@bupt.edu.cn", loaded.getEmail(), "保存用户的邮箱应一致");
+        assertNotNull(loaded, "User should be searchable by username after saving");
+        assertEquals("TA", loaded.getRole(), "Saved user role should be TA");
+        assertEquals("student_x@bupt.edu.cn", loaded.getEmail(), "Saved user email should match");
 
-        assertNull(Validator.validateEmail("valid@mail.com"), "合法邮箱应通过校验");
-        assertNotNull(Validator.validateEmail("invalid-email"), "非法邮箱应报错");
-        assertNotNull(Validator.validatePassword("123"), "过短密码应报错");
+        assertNull(Validator.validateEmail("valid@mail.com"), "Valid email should pass validation");
+        assertNotNull(Validator.validateEmail("invalid-email"), "Invalid email should return error");
+        assertNotNull(Validator.validatePassword("123"), "Too short password should return error");
     }
 
     private static void testRolePermissionHandling() {
@@ -89,39 +89,39 @@ public class FullIterationFeatureTest {
         User adminUser = new User("U103", "admin_user", "hash", "ADMIN",
                 "admin@bupt.edu.cn", "q", "a", "ACTIVE");
 
-        assertEquals("TA", taUser.getRole(), "TA 用户应拥有 TA 角色");
-        assertEquals("MO", moUser.getRole(), "MO 用户应拥有 MO 角色");
-        assertEquals("ADMIN", adminUser.getRole(), "管理员用户应拥有 ADMIN 角色");
+        assertEquals("TA", taUser.getRole(), "TA user should have TA role");
+        assertEquals("MO", moUser.getRole(), "MO user should have MO role");
+        assertEquals("ADMIN", adminUser.getRole(), "Admin user should have ADMIN role");
 
-        assertTrue(taUser.getRole().equals("TA"), "TA 用户只能访问 TA 菜单");
-        assertTrue(moUser.getRole().equals("MO"), "MO 用户只能访问 MO 菜单");
-        assertTrue(adminUser.getRole().equals("ADMIN"), "ADMIN 用户只能访问管理菜单");
+        assertTrue(taUser.getRole().equals("TA"), "TA users should only access TA menus");
+        assertTrue(moUser.getRole().equals("MO"), "MO users should only access MO menus");
+        assertTrue(adminUser.getRole().equals("ADMIN"), "ADMIN users should only access admin menus");
     }
 
     private static void testFormValidation() {
-        assertNotNull(Validator.requireNonEmpty("", "Username"), "用户名为空应返回错误");
-        assertNull(Validator.requireNonEmpty("student", "Username"), "用户名非空应通过");
-        assertNotNull(Validator.validateEmail("bad-format"), "错误格式邮箱应报错");
-        assertNull(Validator.validateEmail("test@bupt.edu.cn"), "合法邮箱应通过");
-        assertNotNull(Validator.validatePassword("123"), "短密码应报错");
-        assertNull(Validator.validatePassword("123456"), "至少 6 位密码应通过");
-        assertNotNull(Validator.validatePhone("abc123"), "非法电话应报错");
-        assertNull(Validator.validatePhone("13812345678"), "合法电话应通过");
-        assertNotNull(Validator.validateJob("", "5", "2026-07-01"), "岗位模块名为空应报错");
-        assertNotNull(Validator.validateJob("AI", "zero", "2026-07-01"), "岗位名额非整数应报错");
-        assertNull(Validator.validateJob("AI", "3", "2026-07-01"), "合法岗位数据应通过");
+        assertNotNull(Validator.requireNonEmpty("", "Username"), "Empty username should return error");
+        assertNull(Validator.requireNonEmpty("student", "Username"), "Non-empty username should pass");
+        assertNotNull(Validator.validateEmail("bad-format"), "Incorrect email format should return error");
+        assertNull(Validator.validateEmail("test@bupt.edu.cn"), "Valid email should pass");
+        assertNotNull(Validator.validatePassword("123"), "Short password should return error");
+        assertNull(Validator.validatePassword("123456"), "Password with at least 6 characters should pass");
+        assertNotNull(Validator.validatePhone("abc123"), "Invalid phone number should return error");
+        assertNull(Validator.validatePhone("13812345678"), "Valid phone number should pass");
+        assertNotNull(Validator.validateJob("", "5", "2026-07-01"), "Empty job module name should return error");
+        assertNotNull(Validator.validateJob("AI", "zero", "2026-07-01"), "Non-integer vacancy count should return error");
+        assertNull(Validator.validateJob("AI", "3", "2026-07-01"), "Valid job data should pass");
     }
 
     private static void testTaProfileAndCvUpload() {
         TAProfile profile = new TAProfile("U104", "2024210001", "Zhang San",
                 "Software Engineering", "Year 3", "13811112222", "uploads/cv_zhangsan.pdf");
-        assertEquals("2024210001", profile.getStudentId(), "学生 ID 应正确保存");
-        assertEquals("uploads/cv_zhangsan.pdf", profile.getCvFilePath(), "简历路径应正确保存");
+        assertEquals("2024210001", profile.getStudentId(), "Student ID should be saved correctly");
+        assertEquals("uploads/cv_zhangsan.pdf", profile.getCvFilePath(), "CV file path should be saved correctly");
 
         assertNull(Validator.validateProfile(profile.getStudentId(), profile.getFullName(), profile.getProgramme(), profile.getYearOfStudy()),
-                "完整个人档案数据应通过校验");
-        assertNull(Validator.validateCvFile("cv.pdf", 1024 * 100), "合法简历文件应通过校验");
-        assertNotNull(Validator.validateCvFile("cv.exe", 1024 * 100), "非法简历格式应报错");
+                "Complete profile data should pass validation");
+        assertNull(Validator.validateCvFile("cv.pdf", 1024 * 100), "Valid CV file should pass validation");
+        assertNotNull(Validator.validateCvFile("cv.exe", 1024 * 100), "Invalid CV format should return error");
     }
 
     private static void testTaBrowseJobs() {
@@ -138,8 +138,8 @@ public class FullIterationFeatureTest {
         jobDao.save(job2);
 
         List<Job> openJobs = jobDao.findOpen();
-        assertTrue(openJobs.size() >= 1, "应至少存在一个开放岗位");
-        assertTrue(openJobs.stream().anyMatch(job -> "J100".equals(job.getJobId())), "开放岗位列表应包含 J100");
+        assertTrue(openJobs.size() >= 1, "At least one open job should exist");
+        assertTrue(openJobs.stream().anyMatch(job -> "J100".equals(job.getJobId())), "Open job list should include J100");
     }
 
     private static void testTaApplyAndStatusFlow() {
@@ -149,9 +149,9 @@ public class FullIterationFeatureTest {
         Application application = new Application(nextAppId, "U100", "J100", "SUBMITTED", "2026-04-08", "");
         appDao.save(application);
 
-        assertTrue(appDao.hasApplied("U100", "J100"), "TA 已申请岗位后应返回 true");
+        assertTrue(appDao.hasApplied("U100", "J100"), "Should return true after TA has applied for a job");
         List<Application> taApps = appDao.findByTa("U100");
-        assertTrue(taApps.size() >= 1, "TA 应至少有一条申请记录");
+        assertTrue(taApps.size() >= 1, "TA should have at least one application record");
 
         Application stored = taApps.get(0);
         stored.setStatus("UNDER_REVIEW");
@@ -159,8 +159,8 @@ public class FullIterationFeatureTest {
         appDao.update(stored);
 
         Application loaded = appDao.findById(stored.getApplicationId());
-        assertEquals("UNDER_REVIEW", loaded.getStatus(), "申请状态应更新为 UNDER_REVIEW");
-        assertEquals("Waiting for MO feedback", loaded.getReviewNote(), "评审备注应保存");
+        assertEquals("UNDER_REVIEW", loaded.getStatus(), "Application status should be updated to UNDER_REVIEW");
+        assertEquals("Waiting for MO feedback", loaded.getReviewNote(), "Review notes should be saved");
     }
 
     private static void testMoPostAndEditJob() {
@@ -173,22 +173,22 @@ public class FullIterationFeatureTest {
         jobDao.save(job);
 
         Job saved = jobDao.findById(nextJobId);
-        assertNotNull(saved, "保存后应能查询到岗位");
-        assertEquals("TA Research Assistant", saved.getJobTitle(), "岗位标题应正确保存");
+        assertNotNull(saved, "Job should be searchable after saving");
+        assertEquals("TA Research Assistant", saved.getJobTitle(), "Job title should be saved correctly");
 
         saved.setVacancies(2);
         saved.setDescription("Support research sessions and grading");
         jobDao.update(saved);
 
         Job updated = jobDao.findById(nextJobId);
-        assertEquals(2, updated.getVacancies(), "编辑后名额应更新");
-        assertEquals("Support research sessions and grading", updated.getDescription(), "岗位描述应更新");
+        assertEquals(2, updated.getVacancies(), "Vacancies should be updated after editing");
+        assertEquals("Support research sessions and grading", updated.getDescription(), "Job description should be updated");
     }
 
     private static void testMoReviewApplicantWorkflow() {
         ApplicationDAO appDao = new ApplicationDAO(DATA_DIR);
         List<Application> jobApps = appDao.findByJob("J100");
-        assertTrue(jobApps.size() >= 1, "MO 查看岗位申请者列表时，至少应看到一条申请");
+        assertTrue(jobApps.size() >= 1, "MO should see at least one application when viewing the job applicant list");
 
         Application target = jobApps.get(0);
         target.setStatus("ACCEPTED");
@@ -196,8 +196,8 @@ public class FullIterationFeatureTest {
         appDao.update(target);
 
         Application refreshed = appDao.findById(target.getApplicationId());
-        assertEquals("ACCEPTED", refreshed.getStatus(), "更新后的申请状态应为 ACCEPTED");
-        assertEquals("Excellent fit", refreshed.getReviewNote(), "更新后的审核备注应保存");
+        assertEquals("ACCEPTED", refreshed.getStatus(), "Updated application status should be ACCEPTED");
+        assertEquals("Excellent fit", refreshed.getReviewNote(), "Updated review notes should be saved");
     }
 
     private static void testHistoricalExportSimulation() throws IOException {
@@ -211,13 +211,13 @@ public class FullIterationFeatureTest {
         Files.write(exportPath, rows);
 
         List<String> readBack = Files.readAllLines(exportPath);
-        assertEquals(2, readBack.size(), "历史导出文件行数应为 2");
-        assertEquals(User.CSV_HEADER, readBack.get(0), "导出文件第一行为 CSV 头");
+        assertEquals(2, readBack.size(), "Historical export file should have 2 lines");
+        assertEquals(User.CSV_HEADER, readBack.get(0), "First line of export file should be CSV header");
     }
 
     private static void run(String title, CheckedRunnable runnable) {
         totalTests++;
-        System.out.printf("[测试 %d] %s ... ", totalTests, title);
+        System.out.printf("[Test %d] %s ... ", totalTests, title);
         try {
             runnable.run();
             passedTests++;
@@ -229,10 +229,10 @@ public class FullIterationFeatureTest {
     }
 
     private static void printSummary() {
-        println("========== 测试总结 ==========");
-        println("总测试项: " + totalTests);
-        println("通过项: " + passedTests);
-        println("失败项: " + (totalTests - passedTests));
+        println("========== Test Summary ==========");
+        println("Total Tests: " + totalTests);
+        println("Passed: " + passedTests);
+        println("Failed: " + (totalTests - passedTests));
     }
 
     private static void println(String message) {
