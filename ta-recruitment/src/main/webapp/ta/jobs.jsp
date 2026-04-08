@@ -56,7 +56,7 @@
                     Deadline: <%= job.getDeadline() %>
                 </span>
             </div>
-            <h3 style="margin-bottom:8px;font-size:18px;"><%= job.getModuleName() %></h3>
+            <h3 style="margin-bottom:8px;font-size:18px;"><%= job.getJobTitle() != null && !job.getJobTitle().isEmpty() ? job.getJobTitle() : job.getModuleName() %></h3>
             <p class="job-desc" style="color:var(--text-secondary);font-size:14px;flex-grow:1;margin-bottom:20px;">
                 <%= job.getRequirements() %>
             </p>

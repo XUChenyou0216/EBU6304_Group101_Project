@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="4.0">
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" version="4.0" metadata-complete="false">
     <display-name>TA Recruitment System</display-name>
     <welcome-file-list>
         <welcome-file>login.jsp</welcome-file>
@@ -7,8 +7,20 @@
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+
+    <!-- P3: Custom 403 error page -->
     <error-page>
         <error-code>403</error-code>
         <location>/error/403.jsp</location>
     </error-page>
+
+    <!-- P5: Explicit servlet mapping for MO applicants review -->
+    <servlet>
+        <servlet-name>MoApplicantsServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoApplicantsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoApplicantsServlet</servlet-name>
+        <url-pattern>/mo/applicants</url-pattern>
+    </servlet-mapping>
 </web-app>

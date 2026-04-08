@@ -68,7 +68,7 @@
                     %>
                     <tr class="job-row" data-status="<%= job.getStatus() %>">
                         <td><span class="module-code"><%= job.getJobId() %></span></td>
-                        <td><strong><%= job.getModuleName() %></strong></td>
+                        <td><strong><%= job.getJobTitle() != null && !job.getJobTitle().isEmpty() ? job.getJobTitle() : job.getModuleName() %></strong></td>
                         <td><%= job.getCreatedDate() %></td>
                         <td><%= job.getDeadline() %></td>
                         <td><%= job.getVacancies() %></td>

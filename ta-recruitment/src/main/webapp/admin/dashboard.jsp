@@ -13,30 +13,8 @@
 
     <div class="page-header">
         <div>
-            <h1>Admin Dashboard</h1>
-            <p>Global overview and system management</p>
-        </div>
-        <div style="display:flex;gap:12px;">
-            <a href="${pageContext.request.contextPath}/admin/exportAllocation"
-               class="btn btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export Final Allocation<br><span style="font-size:12px;font-weight:400;color:var(--text-secondary);">(.csv)</span>
-            </a>
-            <a href="${pageContext.request.contextPath}/admin/exportHistory"
-               class="btn btn-secondary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Export History Archive<br><span style="font-size:12px;font-weight:400;color:var(--text-secondary);">(.txt)</span>
-            </a>
+            <h1>Account Management</h1>
+            <p>Manage user accounts and permissions</p>
         </div>
     </div>
 
