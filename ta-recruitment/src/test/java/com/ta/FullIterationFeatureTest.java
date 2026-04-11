@@ -49,15 +49,20 @@ public class FullIterationFeatureTest {
     private static void runAllTests() {
         println("========== TA Recruitment Sprint 1 + 2 Full Feature Test Script ==========");
 
-        run("Sprint 1: Registration / Login / Password Recovery Modules", FullIterationFeatureTest::testRegistrationLoginRecovery);
+        run("Sprint 1: Registration / Login / Password Recovery Modules",
+                FullIterationFeatureTest::testRegistrationLoginRecovery);
         run("Sprint 1: Role Permissions and User Role Control", FullIterationFeatureTest::testRolePermissionHandling);
         run("Sprint 1: Form Input and Data Validation (US-T04)", FullIterationFeatureTest::testFormValidation);
-        run("Sprint 2: TA Profile Creation and CV Upload Validation", FullIterationFeatureTest::testTaProfileAndCvUpload);
+        run("Sprint 2: TA Profile Creation and CV Upload Validation",
+                FullIterationFeatureTest::testTaProfileAndCvUpload);
         run("Sprint 2: TA Browsing Job List (US-TA03)", FullIterationFeatureTest::testTaBrowseJobs);
-        run("Sprint 2: TA Job Application and Status Tracking (US-TA04/05)", FullIterationFeatureTest::testTaApplyAndStatusFlow);
+        run("Sprint 2: TA Job Application and Status Tracking (US-TA04/05)",
+                FullIterationFeatureTest::testTaApplyAndStatusFlow);
         run("Sprint 2: MO Posting and Editing Jobs (US-MO01)", FullIterationFeatureTest::testMoPostAndEditJob);
-        run("Sprint 2: MO Reviewing Applicants and Updating Status (US-MO02/03/04)", FullIterationFeatureTest::testMoReviewApplicantWorkflow);
-        run("Sprint 2: Historical Archive Export Simulation (US-C02)", FullIterationFeatureTest::testHistoricalExportSimulation);
+        run("Sprint 2: MO Reviewing Applicants and Updating Status (US-MO02/03/04)",
+                FullIterationFeatureTest::testMoReviewApplicantWorkflow);
+        run("Sprint 2: Historical Archive Export Simulation (US-C02)",
+                FullIterationFeatureTest::testHistoricalExportSimulation);
     }
 
     private static void testRegistrationLoginRecovery() {
@@ -66,7 +71,8 @@ public class FullIterationFeatureTest {
 
         assertNotNull(user.getPasswordHash(), "Password hash should not be null");
         assertTrue(PasswordUtil.verify("pass123", user.getPasswordHash()), "Correct password should be verified");
-        assertFalse(PasswordUtil.verify("wrongpass", user.getPasswordHash()), "Incorrect password should not pass verification");
+        assertFalse(PasswordUtil.verify("wrongpass", user.getPasswordHash()),
+                "Incorrect password should not pass verification");
 
         UserDAO userDao = new UserDAO(DATA_DIR);
         userDao.save(user);
@@ -108,7 +114,8 @@ public class FullIterationFeatureTest {
         assertNotNull(Validator.validatePhone("abc123"), "Invalid phone number should return error");
         assertNull(Validator.validatePhone("13812345678"), "Valid phone number should pass");
         assertNotNull(Validator.validateJob("", "5", "2026-07-01"), "Empty job module name should return error");
-        assertNotNull(Validator.validateJob("AI", "zero", "2026-07-01"), "Non-integer vacancy count should return error");
+        assertNotNull(Validator.validateJob("AI", "zero", "2026-07-01"),
+                "Non-integer vacancy count should return error");
         assertNull(Validator.validateJob("AI", "3", "2026-07-01"), "Valid job data should pass");
     }
 
@@ -118,7 +125,9 @@ public class FullIterationFeatureTest {
         assertEquals("2024210001", profile.getStudentId(), "Student ID should be saved correctly");
         assertEquals("uploads/cv_zhangsan.pdf", profile.getCvFilePath(), "CV file path should be saved correctly");
 
-        assertNull(Validator.validateProfile(profile.getStudentId(), profile.getFullName(), profile.getProgramme(), profile.getYearOfStudy()),
+        assertNull(
+                Validator.validateProfile(profile.getStudentId(), profile.getFullName(), profile.getProgramme(),
+                        profile.getYearOfStudy()),
                 "Complete profile data should pass validation");
         assertNull(Validator.validateCvFile("cv.pdf", 1024 * 100), "Valid CV file should pass validation");
         assertNotNull(Validator.validateCvFile("cv.exe", 1024 * 100), "Invalid CV format should return error");
@@ -139,7 +148,8 @@ public class FullIterationFeatureTest {
 
         List<Job> openJobs = jobDao.findOpen();
         assertTrue(openJobs.size() >= 1, "At least one open job should exist");
-        assertTrue(openJobs.stream().anyMatch(job -> "J100".equals(job.getJobId())), "Open job list should include J100");
+        assertTrue(openJobs.stream().anyMatch(job -> "J100".equals(job.getJobId())),
+                "Open job list should include J100");
     }
 
     private static void testTaApplyAndStatusFlow() {
@@ -182,7 +192,8 @@ public class FullIterationFeatureTest {
 
         Job updated = jobDao.findById(nextJobId);
         assertEquals(2, updated.getVacancies(), "Vacancies should be updated after editing");
-        assertEquals("Support research sessions and grading", updated.getDescription(), "Job description should be updated");
+        assertEquals("Support research sessions and grading", updated.getDescription(),
+                "Job description should be updated");
     }
 
     private static void testMoReviewApplicantWorkflow() {
@@ -206,8 +217,8 @@ public class FullIterationFeatureTest {
 
         List<String> rows = List.of(
                 User.CSV_HEADER,
-                new User("U200", "export_test", PasswordUtil.hash("pass200"), "TA", "export@bupt.edu.cn", "sq", "sa", "ACTIVE").toCsvRow()
-        );
+                new User("U200", "export_test", PasswordUtil.hash("pass200"), "TA", "export@bupt.edu.cn", "sq", "sa",
+                        "ACTIVE").toCsvRow());
         Files.write(exportPath, rows);
 
         List<String> readBack = Files.readAllLines(exportPath);
@@ -240,7 +251,8 @@ public class FullIterationFeatureTest {
     }
 
     private static void deleteRecursively(Path path) throws IOException {
-        if (!Files.exists(path)) return;
+        if (!Files.exists(path))
+            return;
         Files.walk(path)
                 .sorted(Comparator.reverseOrder())
                 .forEach(p -> {
@@ -252,24 +264,29 @@ public class FullIterationFeatureTest {
     }
 
     private static void assertTrue(boolean condition, String message) {
-        if (!condition) throw new AssertionError(message);
+        if (!condition)
+            throw new AssertionError(message);
     }
 
     private static void assertFalse(boolean condition, String message) {
-        if (condition) throw new AssertionError(message);
+        if (condition)
+            throw new AssertionError(message);
     }
 
     private static void assertNull(Object value, String message) {
-        if (value != null) throw new AssertionError(message + " (expected null, got: " + value + ")");
+        if (value != null)
+            throw new AssertionError(message + " (expected null, got: " + value + ")");
     }
 
     private static void assertNotNull(Object value, String message) {
-        if (value == null) throw new AssertionError(message + " (expected not null)");
+        if (value == null)
+            throw new AssertionError(message + " (expected not null)");
     }
 
     private static void assertEquals(Object expected, Object actual, String message) {
         if (expected == null) {
-            if (actual != null) throw new AssertionError(message + " (expected null, got: " + actual + ")");
+            if (actual != null)
+                throw new AssertionError(message + " (expected null, got: " + actual + ")");
         } else if (!expected.equals(actual)) {
             throw new AssertionError(message + " (expected: " + expected + ", got: " + actual + ")");
         }
