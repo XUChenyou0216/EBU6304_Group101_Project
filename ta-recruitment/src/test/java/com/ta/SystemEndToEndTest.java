@@ -126,6 +126,41 @@ public class SystemEndToEndTest {
         assertTrue(applicationResult.getUrl().toString().contains("/ta/applications.jsp?success=applied"));
         assertTrue(applicationResult.getBody().getTextContent().contains("My Applications") || applicationResult.getBody().getTextContent().contains("Application"));
     }
+    @Test
+    public void testAdminExportButtons() throws Exception {
+        // 用 admin 账号登录
+        HtmlPage loginPage = webClient.getPage(baseUrl + "/login.jsp");
+        HtmlForm loginForm = loginPage.getForms().get(0);
+        ((HtmlInput) loginForm.getInputByName("username")).setValueAttribute("admin");
+        ((HtmlPasswordInput) loginForm.getInputByName("password")).setValueAttribute("admin");
+        HtmlButton submitButton = loginForm.getFirstByXPath(".//button[@type='submit']");
+        HtmlPage dashboard = submitButton.click();
+        webClient.waitForBackgroundJavaScript(1000);
+        assertTrue("Admin login should redirect to admin dashboard",
+                dashboard.getUrl().toString().contains("/admin/dashboard.jsp"));
+
+        // 测试 Export Final Allocation (.csv)
+        org.htmlunit.WebResponse csvResponse =
+                webClient.getPage(baseUrl + "/admin/exportAllocation").getWebResponse();
+        assertEquals("Export Allocation should return 200",
+                200, csvResponse.getStatusCode());
+        assertTrue("Export Allocation should return CSV content type",
+                csvResponse.getContentType().contains("text/csv"));
+        String csvContent = csvResponse.getContentAsString();
+        assertTrue("CSV should contain header row",
+                csvContent.contains("ApplicationId"));
+
+        // 测试 Export History Archive (.txt)
+        org.htmlunit.WebResponse txtResponse =
+                webClient.getPage(baseUrl + "/admin/exportHistory").getWebResponse();
+        assertEquals("Export History should return 200",
+                200, txtResponse.getStatusCode());
+        assertTrue("Export History should return plain text content type",
+                txtResponse.getContentType().contains("text/plain"));
+        String txtContent = txtResponse.getContentAsString();
+        assertTrue("TXT should contain archive header",
+                txtContent.contains("TA RECRUITMENT SYSTEM - APPLICATION HISTORY ARCHIVE"));
+    }
 
     private static void prepareWebappCopy() throws IOException {
         Path source = Paths.get("src/main/webapp");
