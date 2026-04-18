@@ -1,0 +1,4 @@
+notificationId,userId,type,message,isRead,createdDate
+NTF001,U003,APPLICATION_SUBMITTED,"Your application for ""EBU5476 Computer Networks"" (Module Code) has been submitted successfully.",false,2026-04-18
+NTF002,U002,APPLICATION_SUBMITTED,"A new application has been received for ""EBU5476 Computer Networks"" (Module Code).",false,2026-04-18
+NTF003,U003,STATUS_UPDATED,"Your application for ""EBU5476 Computer Networks"" (Module Code) has been updated to: ACCEPTED.",true,2026-04-18

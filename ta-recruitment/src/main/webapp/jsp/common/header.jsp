@@ -1,10 +1,24 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ta.model.User, com.ta.util.SessionUtil" %>
+<%@ page import="com.ta.dao.NotificationDAO, com.ta.model.Notification" %>
+<%@ page import="java.util.List" %>
 <%
     User currentUser = SessionUtil.getCurrentUser(request);
     String role = currentUser != null ? currentUser.getRole() : "";
     String ctx = request.getContextPath();
     String uri = request.getRequestURI();
+
+    // Load notifications for the current user
+    int unreadCount = 0;
+    List<Notification> userNotifications = null;
+    if (currentUser != null) {
+        String dataDir = SessionUtil.getDataDir(request);
+        NotificationDAO notifDao = new NotificationDAO(dataDir);
+        unreadCount = notifDao.countUnread(currentUser.getUserId());
+        userNotifications = notifDao.findByUser(currentUser.getUserId());
+        // Reverse to show newest first
+        java.util.Collections.reverse(userNotifications);
+    }
 
     // Role display text
     String roleLabel = "TA".equalsIgnoreCase(role) ? "Student Portal" :
@@ -113,10 +127,152 @@
             <span><%= topRoleLabel %></span>
         </div>
         <div class="topbar-right">
+            <!-- Notification Bell -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button class="notif-btn" id="notifBtn" onclick="toggleNotifPanel(event)" title="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <% if (unreadCount > 0) { %>
+                    <span class="notif-badge"><%= unreadCount > 9 ? "9+" : unreadCount %></span>
+                    <% } %>
+                </button>
+                <div class="notif-panel" id="notifPanel">
+                    <div class="notif-panel-header">
+                        <span>Notifications</span>
+                        <button class="notif-markall-btn" onclick="markAllRead()">Mark all read</button>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <% if (userNotifications == null || userNotifications.isEmpty()) { %>
+                        <div class="notif-empty">No notifications yet.</div>
+                        <% } else { for (Notification n : userNotifications) { %>
+                        <div class="notif-item <%= n.isRead() ? "" : "notif-unread" %>" id="ni-<%= n.getNotificationId() %>">
+                            <div class="notif-item-msg"><%= n.getMessage() != null ? n.getMessage().replace("&","&amp;").replace("<","&lt;").replace(">","&gt;") : "" %></div>
+                            <div class="notif-item-meta">
+                                <span class="notif-date"><%= n.getCreatedDate() %></span>
+                                <% if (!n.isRead()) { %>
+                                <button class="notif-read-btn" onclick="markOneRead('<%= n.getNotificationId() %>')">Mark read</button>
+                                <% } %>
+                            </div>
+                        </div>
+                        <% } } %>
+                    </div>
+                </div>
+            </div>
             <a href="<%= ctx %>/logout" class="btn btn-ghost btn-sm">Logout</a>
             <div class="topbar-avatar <%= avatarClass %>"><%= initials %></div>
         </div>
     </header>
+    <style>
+    .notif-wrapper { position: relative; display: inline-flex; align-items: center; }
+    .notif-btn {
+        position: relative; background: none; border: none; cursor: pointer;
+        padding: 6px; border-radius: 8px; color: #64748b;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s;
+    }
+    .notif-btn:hover { background: #f1f5f9; color: #1e293b; }
+    .notif-badge {
+        position: absolute; top: 2px; right: 2px;
+        background: #ef4444; color: #fff; font-size: 10px; font-weight: 700;
+        border-radius: 9999px; min-width: 16px; height: 16px;
+        display: flex; align-items: center; justify-content: center;
+        padding: 0 3px; line-height: 1;
+    }
+    .notif-panel {
+        display: none; position: absolute; top: calc(100% + 8px); right: 0;
+        width: 320px; background: #fff; border: 1px solid #e2e8f0;
+        border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 9999; overflow: hidden;
+    }
+    .notif-panel.open { display: block; }
+    .notif-panel-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px; border-bottom: 1px solid #f1f5f9;
+        font-weight: 600; font-size: 14px; color: #1e293b;
+    }
+    .notif-markall-btn {
+        background: none; border: none; cursor: pointer;
+        font-size: 12px; color: #6366f1; font-weight: 500;
+    }
+    .notif-markall-btn:hover { text-decoration: underline; }
+    .notif-list { max-height: 340px; overflow-y: auto; }
+    .notif-empty { padding: 24px 16px; text-align: center; color: #94a3b8; font-size: 13px; }
+    .notif-item {
+        padding: 12px 16px; border-bottom: 1px solid #f8fafc;
+        transition: background 0.1s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-unread { background: #f0f4ff; }
+    .notif-item-msg { font-size: 13px; color: #334155; line-height: 1.45; margin-bottom: 4px; }
+    .notif-item-meta { display: flex; align-items: center; justify-content: space-between; }
+    .notif-date { font-size: 11px; color: #94a3b8; }
+    .notif-read-btn {
+        background: none; border: none; cursor: pointer;
+        font-size: 11px; color: #6366f1; font-weight: 500; padding: 0;
+    }
+    .notif-read-btn:hover { text-decoration: underline; }
+    </style>
+    <script>
+    (function() {
+        var ctx = '<%= ctx %>';
+
+        window.toggleNotifPanel = function(e) {
+            e.stopPropagation();
+            var panel = document.getElementById('notifPanel');
+            panel.classList.toggle('open');
+        };
+
+        document.addEventListener('click', function(e) {
+            var wrapper = document.getElementById('notifWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                var panel = document.getElementById('notifPanel');
+                if (panel) panel.classList.remove('open');
+            }
+        });
+
+        window.markAllRead = function() {
+            fetch(ctx + '/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=markAllRead'
+            }).then(function() {
+                // Remove unread styling and hide mark-read buttons
+                document.querySelectorAll('.notif-unread').forEach(function(el) {
+                    el.classList.remove('notif-unread');
+                });
+                document.querySelectorAll('.notif-read-btn').forEach(function(el) {
+                    el.style.display = 'none';
+                });
+                var badge = document.querySelector('.notif-badge');
+                if (badge) badge.remove();
+            });
+        };
+
+        window.markOneRead = function(id) {
+            fetch(ctx + '/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'action=markRead&id=' + encodeURIComponent(id)
+            }).then(function() {
+                var item = document.getElementById('ni-' + id);
+                if (item) {
+                    item.classList.remove('notif-unread');
+                    var btn = item.querySelector('.notif-read-btn');
+                    if (btn) btn.style.display = 'none';
+                }
+                // Update badge count
+                var unread = document.querySelectorAll('.notif-unread').length;
+                var badge = document.querySelector('.notif-badge');
+                if (badge) {
+                    if (unread === 0) badge.remove();
+                    else badge.textContent = unread > 9 ? '9+' : unread;
+                }
+            });
+        };
+    })();
+    </script>
 
     <!-- Content starts here (closed by each page) -->
     <main class="content">

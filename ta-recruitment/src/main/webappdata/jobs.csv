@@ -1,3 +1,4 @@
-jobId,moUserId,moduleName,description,requirements,vacancies,deadline,status,createdDate
-J001,U002,"EBU6304 Software Engineering","Assist with lab sessions and marking","Java programming; Git experience",2,2026-04-30,OPEN,2026-03-20
-J002,U002,"EBU5476 Computer Networks","Help with tutorials and invigilation","Networking knowledge; Good communication",1,2026-04-15,OPEN,2026-03-20
+jobId,moUserId,moduleCode,moduleName,jobTitle,description,requiredSkills,vacancies,deadline,workingPeriod,keyDuties,eligibility,status,createdDate
+J001,U002,"Module Code ","EBU6304 Software Engineering","EBU6304 Software Engineering","Assist with lab sessions and marking","Java programming; Git experience",2,2026-04-17,"Jan 2026 to Feb 2026","Key Duties","Eligibility Restrictions",OPEN,2026-03-20
+J002,U002,"Module Code","EBU5476 Computer Networks","EBU5476 Computer Networks","Help with tutorials and invigilation","Networking knowledge; Good communication",1,2026-04-15,"Jan 2026 to Feb 2026","Key Duties","Eligibility Restriction",OPEN,2026-03-20
+J003,U002,"12345","Name","Testing Job Title","This is description","Required Skills and Qualifications",1,2026-04-16,"Jan 2026 to Feb 2026","Key Duties ","Eligibility Requirements",OPEN,2026-04-14
