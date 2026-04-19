@@ -1,6 +1,7 @@
 package com.ta.util;
 
 import com.ta.model.User;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -32,6 +33,6 @@ public class SessionUtil {
     }
 
     public static String getDataDir(HttpServletRequest req) {
-        return req.getServletContext().getRealPath("/") + "data";
+        return DataDirUtil.resolve(req.getServletContext());
     }
 }
