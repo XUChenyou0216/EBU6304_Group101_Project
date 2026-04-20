@@ -27,3 +27,11 @@ create_report.py
 
 # Claude Code
 .claude/
+/.idea/.gitignore
+/.idea/EBU6304_Group101_Project.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
+
+.idea/
