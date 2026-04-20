@@ -32,6 +32,10 @@ public class SessionUtil {
     }
 
     public static String getDataDir(HttpServletRequest req) {
-        return req.getServletContext().getRealPath("/") + "data";
+        String realPath = req.getServletContext().getRealPath("/");
+        if (!realPath.endsWith(java.io.File.separator) && !realPath.endsWith("/")) {
+            realPath += java.io.File.separator;
+        }
+        return realPath + "data";
     }
 }
