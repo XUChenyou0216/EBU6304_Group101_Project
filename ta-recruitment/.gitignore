@@ -1,4 +1,7 @@
 target/
+**/target/
+**/maven-status/
+
 *.class
 *.war
 *.jar

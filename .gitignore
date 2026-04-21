@@ -24,3 +24,13 @@ hs_err_pid*
 replay_pid*
 
 create_report.py
+
+# Claude Code
+.claude/
+
+# Maven build output (never commit — .gitignore alone does not untrack already-added files)
+ta-recruitment/target/
+**/target/
+
+# Accidental duplicate tree if someone committed from inside a zip folder
+EBU6304_Group101_Project-main/
