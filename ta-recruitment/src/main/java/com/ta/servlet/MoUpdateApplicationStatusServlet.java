@@ -2,8 +2,10 @@ package com.ta.servlet;
 
 import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
+import com.ta.dao.NotificationDAO;
 import com.ta.model.Application;
 import com.ta.model.Job;
+import com.ta.model.Notification;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
 
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 
 /**
  * MO updates a single application status (Applicants & Review table).
@@ -55,6 +58,13 @@ public class MoUpdateApplicationStatusServlet extends HttpServlet {
             app.setReviewNote(reviewNote.trim());
         }
         appDao.update(app);
+
+        // Notify TA that their application status has changed
+        String statusLabel = newStatus.trim().toUpperCase();
+        String taMsg = "Your application for \"" + job.getJobTitle() + "\" (" + job.getModuleCode() + ") has been updated to: " + statusLabel + ".";
+        NotificationDAO notifDAO = new NotificationDAO(dataDir);
+        notifDAO.save(new Notification(notifDAO.generateNextId(), app.getTaUserId(),
+            "STATUS_UPDATED", taMsg, false, LocalDate.now().toString()));
 
         StringBuilder redir = new StringBuilder(req.getContextPath() + "/mo/applicants?success=updated");
         if (jobIdParam != null && !jobIdParam.isEmpty()) {
