@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.ta.dao.*, com.ta.model.*, com.ta.util.SessionUtil, java.util.List" %>
+<%@ page import="com.ta.dao.*, com.ta.model.*, com.ta.util.SessionUtil, com.ta.util.JobDeadlineUtil, java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recruitment Progress - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <style>
+        .deadline-past { color: #dc2626; font-weight: 600; }
+    </style>
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
@@ -94,8 +97,20 @@
                             }
                             int pct = job.getVacancies() > 0 ? (int) Math.round(jAccepted * 100.0 / job.getVacancies()) : 0;
                             if (pct > 100) pct = 100;
-                            String statusClass = "OPEN".equals(job.getStatus()) ? "active" : "closed";
-                            String statusLabel = "OPEN".equals(job.getStatus()) ? "Active" : "Closed";
+                            boolean past = JobDeadlineUtil.isPastDeadline(job.getDeadline());
+                            boolean open = "OPEN".equals(job.getStatus());
+                            String statusBadgeClass;
+                            String statusLabel;
+                            if (open) {
+                                statusBadgeClass = "active";
+                                statusLabel = "Active";
+                            } else if (past) {
+                                statusBadgeClass = "expired";
+                                statusLabel = "Expired";
+                            } else {
+                                statusBadgeClass = "closed";
+                                statusLabel = "Closed";
+                            }
                         %>
                         <tr>
                             <td><strong><%= job.getJobTitle() != null && !job.getJobTitle().isEmpty() ? job.getJobTitle() : job.getModuleName() %></strong></td>
@@ -113,7 +128,7 @@
                                     <span style="font-size:13px;font-weight:600;min-width:36px;"><%= pct %>%</span>
                                 </div>
                             </td>
-                            <td><span class="badge badge-<%= statusClass %>"><%= statusLabel %></span></td>
+                            <td><span class="badge badge-<%= statusBadgeClass %>"><%= statusLabel %></span></td>
                         </tr>
                         <% } %>
                     </tbody>
