@@ -1,6 +1,7 @@
 package com.ta.servlet;
 
 import com.ta.model.*;
+import com.ta.util.DataDirUtil;
 import com.ta.util.FileManager;
 import com.ta.util.PasswordUtil;
 
@@ -15,10 +16,12 @@ public class AppInitializer implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         String realPath = sce.getServletContext().getRealPath("/");
-        String dataDir = realPath + "data";
+        String dataDir = DataDirUtil.resolve(sce.getServletContext());
 
         new File(dataDir).mkdirs();
-        new File(realPath + "uploads").mkdirs();
+        if (realPath != null) {
+            new File(realPath, "uploads").mkdirs();
+        }
 
         // ===== users.csv =====
         File usersFile = new File(dataDir + "/users.csv");
