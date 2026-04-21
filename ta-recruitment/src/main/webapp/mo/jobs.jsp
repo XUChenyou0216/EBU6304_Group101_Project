@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.ta.dao.*, com.ta.model.*, com.ta.util.SessionUtil, java.util.List" %>
+<%@ page import="com.ta.dao.*, com.ta.model.*, com.ta.util.SessionUtil, com.ta.util.JobDeadlineUtil, java.util.List" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Posts - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <style>
+        .deadline-past { color: #dc2626; font-weight: 600; }
+        .job-row-past { background: #fff7f7; }
+    </style>
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
@@ -63,17 +67,29 @@
                 <tbody>
                     <% for (Job job : myJobs) {
                         List<Application> apps = appDAO.findByJob(job.getJobId());
-                        String statusClass = "OPEN".equals(job.getStatus()) ? "active" : "closed";
-                        String statusLabel = "OPEN".equals(job.getStatus()) ? "Active" : "Closed";
+                        boolean past = JobDeadlineUtil.isPastDeadline(job.getDeadline());
+                        boolean open = "OPEN".equals(job.getStatus());
+                        String statusBadgeClass;
+                        String statusLabel;
+                        if (open) {
+                            statusBadgeClass = "active";
+                            statusLabel = "Active";
+                        } else if (past) {
+                            statusBadgeClass = "expired";
+                            statusLabel = "Expired";
+                        } else {
+                            statusBadgeClass = "closed";
+                            statusLabel = "Closed";
+                        }
                     %>
-                    <tr class="job-row" data-status="<%= job.getStatus() %>">
+                    <tr class="job-row<%= past ? " job-row-past" : "" %>" data-status="<%= job.getStatus() %>">
                         <td><span class="module-code"><%= job.getJobId() %></span></td>
                         <td><strong><%= job.getJobTitle() != null && !job.getJobTitle().isEmpty() ? job.getJobTitle() : job.getModuleName() %></strong></td>
                         <td><%= job.getCreatedDate() %></td>
-                        <td><%= job.getDeadline() %></td>
+                        <td class="<%= past ? "deadline-past" : "" %>"><%= job.getDeadline() %></td>
                         <td><%= job.getVacancies() %></td>
                         <td><a href="${pageContext.request.contextPath}/mo/applicants.jsp?jobId=<%= job.getJobId() %>" style="color:var(--primary);font-weight:700;"><%= apps.size() %></a></td>
-                        <td><span class="badge badge-<%= statusClass %>"><%= statusLabel %></span></td>
+                        <td><span class="badge badge-<%= statusBadgeClass %>"><%= statusLabel %></span></td>
                         <td style="display:flex;gap:8px;">
                             <a href="${pageContext.request.contextPath}/mo/applicants.jsp?jobId=<%= job.getJobId() %>" class="btn btn-primary btn-sm" style="border-radius:20px;padding:6px 16px;">View</a>
                             <a href="${pageContext.request.contextPath}/mo/edit-job?jobId=<%= job.getJobId() %>" class="btn btn-secondary btn-sm" style="border-radius:20px;padding:6px 16px;">Edit</a>

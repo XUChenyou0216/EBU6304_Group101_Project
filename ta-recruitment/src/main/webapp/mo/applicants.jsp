@@ -1,5 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.ta.dao.*, com.ta.model.*, com.ta.util.SessionUtil, java.util.List" %>
+<%!
+    /** Escape for textarea body (avoid breaking HTML / XSS). */
+    private static String escNote(String s) {
+        if (s == null || s.isEmpty()) return "";
+        StringBuilder sb = new StringBuilder(s.length() + 8);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '&') sb.append("&amp;");
+            else if (c == '<') sb.append("&lt;");
+            else if (c == '>') sb.append("&gt;");
+            else sb.append(c);
+        }
+        return sb.toString();
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +22,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Review Applicants - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/applicants-review.css">
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
@@ -28,7 +44,7 @@
     </div>
 
     <% if ("updated".equals(request.getParameter("success"))) { %>
-        <div class="alert alert-success">Application status updated!</div>
+        <div class="alert alert-success">Application status and/or review note saved.</div>
     <% } %>
 
     <% if (applicants.isEmpty()) { %>
@@ -42,7 +58,7 @@
                     <th>Programme</th>
                     <th>CV</th>
                     <th>Status</th>
-                    <th>Action</th>
+                    <th style="min-width:280px;">Review note &amp; status</th>
                 </tr>
             </thead>
             <tbody>
@@ -61,17 +77,20 @@
                         <% } %>
                     </td>
                     <td><span class="badge badge-<%= app.getStatus().toLowerCase() %>"><%= app.getStatus().replace("_"," ") %></span></td>
-                    <td>
-                        <form action="${pageContext.request.contextPath}/mo/update-status" method="post" style="display:inline-flex;gap:6px;align-items:center;">
+                    <td style="vertical-align:top;">
+                        <form action="${pageContext.request.contextPath}/mo/update-status" method="post" class="mo-applicant-form">
                             <input type="hidden" name="applicationId" value="<%= app.getApplicationId() %>">
                             <input type="hidden" name="jobId" value="<%= jobId %>">
-                            <select name="newStatus" style="padding:6px 10px;border:1px solid var(--border-solid);border-radius:6px;font-size:13px;">
-                                <option value="SUBMITTED" <%= "SUBMITTED".equals(app.getStatus())?"selected":"" %>>Submitted</option>
-                                <option value="UNDER_REVIEW" <%= "UNDER_REVIEW".equals(app.getStatus())?"selected":"" %>>Under Review</option>
-                                <option value="ACCEPTED" <%= "ACCEPTED".equals(app.getStatus())?"selected":"" %>>Accepted</option>
-                                <option value="REJECTED" <%= "REJECTED".equals(app.getStatus())?"selected":"" %>>Rejected</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                            <textarea name="reviewNote" class="mo-review-note" rows="3" placeholder="Notes for this applicant (saved to applications.csv)"><%= escNote(app.getReviewNote()) %></textarea>
+                            <div class="mo-applicant-form-actions">
+                                <select name="newStatus" class="mo-status-select">
+                                    <option value="SUBMITTED" <%= "SUBMITTED".equals(app.getStatus())?"selected":"" %>>Submitted</option>
+                                    <option value="UNDER_REVIEW" <%= "UNDER_REVIEW".equals(app.getStatus())?"selected":"" %>>Under Review</option>
+                                    <option value="ACCEPTED" <%= "ACCEPTED".equals(app.getStatus())?"selected":"" %>>Accepted</option>
+                                    <option value="REJECTED" <%= "REJECTED".equals(app.getStatus())?"selected":"" %>>Rejected</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                            </div>
                         </form>
                     </td>
                 </tr>
