@@ -20,19 +20,19 @@ public class ApplicationDAO {
         return apps;
     }
 
+    public Application findById(String applicationId) {
+        for (Application a : findAll()) {
+            if (a.getApplicationId().equals(applicationId)) return a;
+        }
+        return null;
+    }
+
     public List<Application> findByTa(String taUserId) {
         return findAll().stream().filter(a -> a.getTaUserId().equals(taUserId)).collect(Collectors.toList());
     }
 
     public List<Application> findByJob(String jobId) {
         return findAll().stream().filter(a -> a.getJobId().equals(jobId)).collect(Collectors.toList());
-    }
-
-    public Application findById(String applicationId) {
-        for (Application a : findAll()) {
-            if (a.getApplicationId().equals(applicationId)) return a;
-        }
-        return null;
     }
 
     public boolean hasApplied(String taUserId, String jobId) {

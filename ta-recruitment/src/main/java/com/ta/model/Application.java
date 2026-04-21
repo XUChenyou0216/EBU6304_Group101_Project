@@ -1,9 +1,5 @@
 package com.ta.model;
 
-/**
- * CSV-backed application row used by {@link com.ta.dao.ApplicationDAO} and servlets.
- * JPA entity (database mapping): {@link com.university.tarecruitment.entity.Application}.
- */
 public class Application {
     private String applicationId;
     private String taUserId;

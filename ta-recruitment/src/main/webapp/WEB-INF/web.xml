@@ -8,7 +8,13 @@
         <session-timeout>30</session-timeout>
     </session-config>
 
-    <!-- Explicit mapping: some Tomcat / plugin setups do not pick up @WebServlet for this path -->
+    <!-- P3: Custom 403 error page -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/error/403.jsp</location>
+    </error-page>
+
+    <!-- P5: Explicit servlet mapping for MO applicants review -->
     <servlet>
         <servlet-name>MoApplicantsServlet</servlet-name>
         <servlet-class>com.ta.servlet.MoApplicantsServlet</servlet-class>

@@ -1,8 +1,5 @@
-userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath,skills,gpa,academicYear
-U003,2024CS1001,"Li Wei","Computer Science",3,,,Python;Java;Algorithms;Data Structures,3.85,2024/25
-U004,2023CS2045,"Chen Ming","Computer Science",3,,,Java;Teaching Experience;Algorithms,3.72,2024/25
-U005,2024SE1102,"Wang Fang","Software Engineering",2,,,Python;Data Structures;Statistics,3.91,2024/25
-U006,2022CS0891,"Liu Yang","Computer Science",4,,,Algorithms;Java;Teaching Experience,3.68,2023/24
-U007,2024NET2003,"Zhao Qian","Software Engineering",2,,,Java;Statistics,3.55,2024/25
-U008,2023CS3008,"Sun Lei","Computer Science",3,,,Python;Data Structures;Algorithms,3.88,2024/25
-U009,2024CS0456,"Zhou Jing","Computer Science",2,,,Teaching Experience;Statistics;Algorithms,3.79,2024/25
+userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath
+userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath
+U004,2023213675,付美�?,CS,Year 1,null,uploads/sample_cv.pdf
+U006,2311223,Xu Chenyou,IST,Year 3,null,uploads/sample_cv.pdf
+U003,1233322,yyy,IST,Year 1,null,

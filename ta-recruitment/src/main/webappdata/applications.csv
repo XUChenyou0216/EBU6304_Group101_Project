@@ -1,0 +1,3 @@
+applicationId,taUserId,jobId,status,appliedDate,reviewNote
+APP001,U006,J001,ACCEPTED,2026-04-08,""
+APP002,U003,J001,SUBMITTED,2026-04-08,""
