@@ -99,16 +99,18 @@ public class Job {
         // Handle old CSV format which had 9 fields
         if (f.length == 9) {
             try {
-                return new Job(f[0], f[1], "", f[2], "", f[3], f[4],
+                Job job = new Job(f[0], f[1], "", f[2], "", f[3], f[4],
                     Integer.parseInt(f[5]), f[6], "", "", "", f[7], f[8]);
+                return isDisplayable(job) ? job : null;
             } catch (NumberFormatException e) { return null; }
         }
         
         if (f.length < 14) return null;
         
         try {
-            return new Job(f[0], f[1], f[2], f[3], f[4], f[5], f[6],
+            Job job = new Job(f[0], f[1], f[2], f[3], f[4], f[5], f[6],
                 Integer.parseInt(f[7]), f[8], f[9], f[10], f[11], f[12], f[13]);
+            return isDisplayable(job) ? job : null;
         } catch (NumberFormatException e) { return null; }
     }
 
@@ -133,5 +135,21 @@ public class Job {
         }
         fields.add(sb.toString());
         return fields.toArray(new String[0]);
+    }
+
+    private static boolean isDisplayable(Job job) {
+        if (job == null) {
+            return false;
+        }
+
+        return hasText(job.getModuleCode())
+                || hasText(job.getModuleName())
+                || hasText(job.getJobTitle())
+                || hasText(job.getDescription())
+                || hasText(job.getRequiredSkills());
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

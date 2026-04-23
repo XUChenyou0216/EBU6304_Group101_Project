@@ -1,6 +1,8 @@
 package com.ta.servlet;
 
+import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
+import com.ta.model.Application;
 import com.ta.model.Job;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
@@ -37,6 +39,7 @@ public class PostJobServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         String jobId = request.getParameter("jobId");
+        String action = request.getParameter("action");
         String moduleCode = request.getParameter("moduleCode");
         String moduleName = request.getParameter("moduleName");
         String jobTitle = request.getParameter("jobTitle");
@@ -59,14 +62,40 @@ public class PostJobServlet extends HttpServlet {
 
         String dataDir = SessionUtil.getDataDir(request);
         JobDAO jobDAO = new JobDAO(dataDir);
+        ApplicationDAO applicationDAO = new ApplicationDAO(dataDir);
 
         if (jobId != null && !jobId.trim().isEmpty()) {
-            // Edit existing job
             Job job = jobDAO.findById(jobId);
             if (job == null || !job.getMoUserId().equals(currentUser.getUserId())) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Not authorized to edit this job.");
                 return;
             }
+
+            if ("close".equalsIgnoreCase(action)) {
+                if (!"OPEN".equalsIgnoreCase(job.getStatus())) {
+                    response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?error=alreadyclosed");
+                    return;
+                }
+
+                int acceptedCount = 0;
+                for (Application application : applicationDAO.findByJob(jobId)) {
+                    if ("ACCEPTED".equalsIgnoreCase(application.getStatus())) {
+                        acceptedCount++;
+                    }
+                }
+
+                if (acceptedCount >= Math.max(job.getVacancies(), 0)) {
+                    response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?error=filled");
+                    return;
+                }
+
+                job.setStatus("CLOSED");
+                jobDAO.update(job);
+                response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?success=closed");
+                return;
+            }
+
+            // Edit existing job
             job.setModuleCode(moduleCode);
             job.setModuleName(moduleName);
             job.setJobTitle(jobTitle);
