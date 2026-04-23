@@ -50,6 +50,10 @@
             <h3>Job Postings</h3>
             <p>View and manage your TA position postings</p>
         </a>
+        <a href="${pageContext.request.contextPath}/mo/progress" class="dash-card">
+            <h3>Recruitment Progress</h3>
+            <p>Track applications, screening activity, and hiring completion by role</p>
+        </a>
         <a href="${pageContext.request.contextPath}/mo/post-job.jsp" class="dash-card">
             <h3>Post New Job</h3>
             <p>Create a new TA vacancy for your module</p>
