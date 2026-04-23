@@ -39,6 +39,7 @@ public class MoBatchUpdateApplicationStatusServlet extends HttpServlet {
         String dataDir = SessionUtil.getDataDir(req);
         ApplicationDAO appDao = new ApplicationDAO(dataDir);
         JobDAO jobDao = new JobDAO(dataDir);
+        boolean skippedForCapacity = false;
 
         for (String part : payload.split(";")) {
             part = part.trim();
@@ -51,11 +52,19 @@ public class MoBatchUpdateApplicationStatusServlet extends HttpServlet {
             if (app == null) continue;
             Job job = jobDao.findById(app.getJobId());
             if (job == null || !job.getMoUserId().equals(u.getUserId())) continue;
-            app.setStatus(newStatus.toUpperCase());
+            String normalized = newStatus.toUpperCase();
+            if (appDao.isAcceptanceCapExceeded(job, app, normalized)) {
+                skippedForCapacity = true;
+                continue;
+            }
+            app.setStatus(normalized);
             appDao.update(app);
         }
 
         StringBuilder redir = new StringBuilder(req.getContextPath() + "/mo/applicants?success=batch");
+        if (skippedForCapacity) {
+            redir.append("&warning=capacity");
+        }
         if (jobIdParam != null && !jobIdParam.isEmpty()) {
             redir.append("&jobId=").append(java.net.URLEncoder.encode(jobIdParam, java.nio.charset.StandardCharsets.UTF_8));
         }
