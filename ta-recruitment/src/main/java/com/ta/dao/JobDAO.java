@@ -6,6 +6,7 @@ import com.ta.util.JobDeadlineUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class JobDAO {
@@ -46,7 +47,11 @@ public class JobDAO {
     }
 
     public Job findById(String jobId) {
-        for (Job j : findAll()) if (j.getJobId().equals(jobId)) return j;
+        for (Job j : findAll()) {
+            if (Objects.equals(j.getJobId(), jobId)) {
+                return j;
+            }
+        }
         return null;
     }
 
