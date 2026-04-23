@@ -23,4 +23,13 @@
         <servlet-name>MoApplicantsServlet</servlet-name>
         <url-pattern>/mo/applicants</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MoProgressServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoProgressServlet</servlet-name>
+        <url-pattern>/mo/progress</url-pattern>
+    </servlet-mapping>
 </web-app>
