@@ -109,19 +109,31 @@
                 </div>
             <% } %>
 
-            <%-- 成功显示：当操作成功时显示 --%>
-            <% if (request.getAttribute("success") != null || "true".equals(request.getParameter("success"))) { %>
+            <%-- 成功显示：支持 attribute（ProfileServlet）和 URL param（UploadCvServlet） --%>
+            <% if (request.getAttribute("success") != null
+                   || "true".equals(request.getParameter("success"))
+                   || "success".equals(request.getParameter("uploadStatus"))) { %>
                 <div style="background: #f0fdf4; color: #15803d; padding: 14px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; border: 1px solid #dcfce7;">
-                    <div style="font-weight: bold; margin-bottom: 4px;">✅ Successed</div>
+                    <div style="font-weight: bold; margin-bottom: 4px;">✅ Upload Successful</div>
                     Your CV has been uploaded and updated successfully.
                 </div>
             <% } %>
 
-            <%-- 错误显示：此处显示由 Servlet 返回的 error 消息 --%>
-            <% if (request.getAttribute("error") != null) { %>
+            <%-- 错误显示：支持 attribute（ProfileServlet）和 URL param（UploadCvServlet redirect） --%>
+            <%
+                String _cvErrMsg = null;
+                String _errParam = request.getParameter("error");
+                if ("invalid_format".equals(_errParam)) {
+                    _cvErrMsg = "Invalid file format. Supported formats: PDF, DOC, DOCX, JPG, PNG";
+                } else if ("too_large".equals(_errParam)) {
+                    _cvErrMsg = "File exceeds 10 MB limit. Please upload a smaller file.";
+                }
+                Object _attrErr = request.getAttribute("error");
+            %>
+            <% if (_attrErr != null || _cvErrMsg != null) { %>
                 <div style="background: #fef2f2; color: #b91c1c; padding: 14px; border-radius: 8px; font-size: 13px; margin-bottom: 20px; border: 1px solid #fee2e2;">
                     <div style="font-weight: bold; margin-bottom: 4px;">⚠️ Upload Failed</div>
-                    <%= request.getAttribute("error") %>
+                    <%= _cvErrMsg != null ? _cvErrMsg : _attrErr %>
                 </div>
             <% } %>
 
