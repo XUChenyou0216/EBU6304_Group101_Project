@@ -4,6 +4,7 @@ import com.ta.dao.JobDAO;
 import com.ta.model.Job;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
+import com.ta.util.Validator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -40,13 +41,13 @@ public class PostJobServlet extends HttpServlet {
         String moduleCode = request.getParameter("moduleCode");
         String moduleName = request.getParameter("moduleName");
         String jobTitle = request.getParameter("jobTitle");
-        String description = request.getParameter("description");
+        String description = Validator.sanitizeForCsv(request.getParameter("description"));
         String vacanciesStr = request.getParameter("vacancies");
         String deadline = request.getParameter("deadline");
-        String workingPeriod = request.getParameter("workingPeriod");
-        String keyDuties = request.getParameter("keyDuties");
-        String requiredSkills = request.getParameter("requiredSkills");
-        String eligibility = request.getParameter("eligibility");
+        String workingPeriod = Validator.sanitizeForCsv(request.getParameter("workingPeriod"));
+        String keyDuties = Validator.sanitizeForCsv(request.getParameter("keyDuties"));
+        String requiredSkills = Validator.sanitizeForCsv(request.getParameter("requiredSkills"));
+        String eligibility = Validator.sanitizeForCsv(request.getParameter("eligibility"));
 
         int vacancies = 1;
         try {
