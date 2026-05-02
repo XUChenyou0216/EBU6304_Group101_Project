@@ -1,4 +1,17 @@
 jobId,moUserId,moduleCode,moduleName,jobTitle,description,requiredSkills,vacancies,deadline,workingPeriod,keyDuties,eligibility,status,createdDate
-J001,U002,"EBU6304 Software Engineering","Assist with lab sessions and marking","Java programming; Git experience",2,2026-04-30,OPEN,2026-03-20,,
-J002,U002,"EBU5476 Computer Networks","Help with tutorials and invigilation","Networking knowledge; Good communication",1,2026-04-15,OPEN,2026-03-20
-J003,U002,"1","Test","Test","1","1",1,2026-04-08,"1","1","1",OPEN,2026-04-08
+J003,U002,"1","Test","Test","1","1",1,2026-05-29,"1","1","1",CLOSED,2026-04-08
+J010,U002,"Module Code ","EBU5476 Computer Networks","Job Title","Job Description","eee;ddd",2,2026-05-10,"Jan 2026 to Feb 2026","1.wwww 2.eeee 3.eeee","Eligibility Restrictions",CLOSED,2026-05-02
+J011,U004,"Module Code ","EBU5474 Computer","Job Title","Job Description","sss",2,2026-05-10,"Jan 2026 to Feb 2026","ssss","ss",OPEN,2026-05-02
+J012,U004,"Module Code ","EBU5474 Computer","Job Title","1.222 2.rrr 3.rrr","Required Skills",2,2026-05-10,"Jan 2026 to Feb 2026","Key Duties","Eligibility Requirements",OPEN,2026-05-02
+J013,U002,"Module Code ","EBU5474 Computer Network","Job Title1","ddd sss","ss",2,2026-05-10,"Jan 2026 to Feb 2026","sss","d",OPEN,2026-05-02
+J014,U002,"1","Testaa","Test","aaa","ssss",1,2026-05-29,"1","aa dd","aaaa",OPEN,2026-05-02
+J015,U002,"1223","Testaa","Test222","11","33",1,2026-05-29,"1","222","a",OPEN,2026-05-02
+J016,U006,"VT001","Validator Test Module","BellColor-1777715948362","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J017,U006,"VT001","Validator Test Module","ColorTest-1777715948931","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J018,U006,"VT001","Validator Test Module","VT-Job-1777715949058","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J019,U008,"VT001","Validator Test Module","BellColor-1777716002568","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J020,U008,"VT001","Validator Test Module","ColorTest-1777716002869","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J021,U008,"VT001","Validator Test Module","VT-Job-1777716003035","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J022,U010,"VT001","Validator Test Module","BellColor-1777716398416","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J023,U010,"VT001","Validator Test Module","ColorTest-1777716398715","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02
+J024,U010,"VT001","Validator Test Module","VT-Job-1777716398856","Test job description.","Java",2,2026-06-01,"Autumn 2026","Grading and tutoring.","Year 2+",OPEN,2026-05-02

@@ -1,7 +1,9 @@
 package com.ta.servlet;
 
 import com.ta.dao.JobDAO;
+import com.ta.dao.NotificationDAO;
 import com.ta.model.Job;
+import com.ta.model.Notification;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
 import com.ta.util.Validator;
@@ -100,6 +102,19 @@ public class PostJobServlet extends HttpServlet {
                     LocalDate.now().toString()
             );
             jobDAO.save(newJob);
+
+            // Notify the MO that the job was posted successfully
+            NotificationDAO notifDao = new NotificationDAO(dataDir);
+            Notification notif = new Notification(
+                    notifDao.generateNextId(),
+                    currentUser.getUserId(),
+                    Notification.TYPE_JOB_POSTED,
+                    "Job \"" + moduleName + " — " + jobTitle + "\" has been posted successfully.",
+                    false,
+                    LocalDate.now().toString()
+            );
+            notifDao.save(notif);
+
             response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?success=posted");
         }
     }
