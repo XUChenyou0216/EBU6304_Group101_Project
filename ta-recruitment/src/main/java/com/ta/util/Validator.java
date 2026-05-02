@@ -75,4 +75,9 @@ public class Validator {
         err = requireNonEmpty(deadline, "Deadline");
         return err;
     }
+
+    public static String sanitizeForCsv(String input) {
+        if (input == null) return "";
+        return input.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");
+    }
 }
