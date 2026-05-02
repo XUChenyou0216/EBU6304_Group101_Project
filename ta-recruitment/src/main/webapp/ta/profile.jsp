@@ -124,7 +124,7 @@
                 String _cvErrMsg = null;
                 String _errParam = request.getParameter("error");
                 if ("invalid_format".equals(_errParam)) {
-                    _cvErrMsg = "Invalid file format. Supported formats: PDF, DOC, DOCX, JPG, PNG";
+                    _cvErrMsg = "Invalid file format. Supported formats: PDF, DOC, DOCX";
                 } else if ("too_large".equals(_errParam)) {
                     _cvErrMsg = "File exceeds 10 MB limit. Please upload a smaller file.";
                 }
@@ -142,9 +142,9 @@
                     <div style="font-size: 32px; margin-bottom: 12px;">📤</div>
                     <div style="font-weight: 700; font-size: 16px; color: #1e293b;">Upload your CV</div>
                     <div style="font-size: 13px; color: #64748b; margin: 6px 0;">Drag & drop your file here, or click to browse</div>
-                    <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">PDF, DOC, DOCX, JPG, PNG (max 10MB)</div>
+                    <div style="font-size: 11px; color: #94a3b8; font-weight: 500;">PDF, DOC, DOCX (max 10MB)</div>
                 </label>
-                <input type="file" id="cvFile" name="cvFile" style="display: none;" accept=".pdf,.doc,.docx,.jpg,.png" onchange="this.form.submit()">
+                <input type="file" id="cvFile" name="cvFile" style="display: none;" accept=".pdf,.doc,.docx" onchange="this.form.submit()">
             </form>
         </div>
     </div>
