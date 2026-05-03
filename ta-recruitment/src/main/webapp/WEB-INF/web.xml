@@ -23,4 +23,32 @@
         <servlet-name>MoApplicantsServlet</servlet-name>
         <url-pattern>/mo/applicants</url-pattern>
     </servlet-mapping>
+
+    <!-- Explicit mappings: tomcat7:run may not pick up @WebServlet reliably -->
+    <servlet>
+        <servlet-name>MoReopenJobServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoReopenJobServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoReopenJobServlet</servlet-name>
+        <url-pattern>/mo/reopen-job</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MoCloseFullJobsServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoCloseFullJobsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoCloseFullJobsServlet</servlet-name>
+        <url-pattern>/mo/close-full-jobs</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MoBatchUpdateApplicationStatusServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoBatchUpdateApplicationStatusServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoBatchUpdateApplicationStatusServlet</servlet-name>
+        <url-pattern>/mo/batch-update-applications</url-pattern>
+    </servlet-mapping>
 </web-app>
