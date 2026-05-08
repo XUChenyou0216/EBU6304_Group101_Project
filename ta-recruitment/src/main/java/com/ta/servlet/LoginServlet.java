@@ -24,6 +24,16 @@ public class LoginServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        long currentTime = System.currentTimeMillis();
+        Long lockUntil = (Long) session.getAttribute("lock_until");
+        if (lockUntil != null && currentTime < lockUntil) {
+            long remainingMins = (lockUntil - currentTime) / (60 * 1000) + 1;
+            req.setAttribute("error", "Too many failed attempts. Try again in " + remainingMins + " minutes.");
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            return;
+        }
+
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
@@ -38,13 +48,30 @@ public class LoginServlet extends HttpServlet {
         User user = dao.findByUsername(username.trim());
 
         if (user == null || !PasswordUtil.verify(password, user.getPasswordHash())) {
-            req.setAttribute("error", "Invalid username or password.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp); return;
+            // 登录失败处理
+            Integer attempts = (Integer) session.getAttribute("login_attempts");
+            if (attempts == null) attempts = 0;
+            attempts++;
+
+            if (attempts >= 5) {
+                session.setAttribute("lock_until", currentTime + (5 * 60 * 1000));
+                session.removeAttribute("login_attempts"); // 锁定后重置计数
+                req.setAttribute("error", "Too many failed attempts. Account locked for 5 minutes.");
+            } else {
+                session.setAttribute("login_attempts", attempts);
+                req.setAttribute("error", "Invalid username or password.");
+            }
+
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            return;
         }
         if ("SUSPENDED".equals(user.getStatus())) {
             req.setAttribute("error", "Account suspended. Contact admin.");
             req.getRequestDispatcher("/login.jsp").forward(req, resp); return;
         }
+
+        session.removeAttribute("login_attempts");
+        session.removeAttribute("lock_until");
 
         SessionUtil.setCurrentUser(req, user);
         redirectToDashboard(req, resp);
@@ -53,6 +80,11 @@ public class LoginServlet extends HttpServlet {
     private void redirectToDashboard(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User user = SessionUtil.getCurrentUser(req);
         String ctx = req.getContextPath();
+        if (user == null || user.getRole() == null) {
+            resp.sendRedirect(ctx + "/login.jsp");
+            return;
+        }
+
         switch (user.getRole().toUpperCase()) {
             case "TA":    resp.sendRedirect(ctx + "/ta/dashboard.jsp"); break;
             case "MO":    resp.sendRedirect(ctx + "/mo/dashboard.jsp"); break;
