@@ -13,7 +13,7 @@
         <div class="form-group"><label>Role *</label>
             <select name="role" required><option value="">-- Select --</option>
                 <option value="TA">Teaching Assistant</option><option value="MO">Module Organiser</option></select></div>
-        <div class="form-group"><label>Password * (min 6 chars)</label><input type="password" name="password" required minlength="6"></div>
+        <div class="form-group"><label>Password * (min 6 chars, at least one uppercase, lowercase letter and number)</label><input type="password" name="password" required minlength="6"></div>
         <div class="form-group"><label>Confirm Password *</label><input type="password" name="confirmPassword" required></div>
         <div class="form-group"><label>Security Question *</label>
             <select name="securityQuestion" required><option value="">-- Select --</option>
