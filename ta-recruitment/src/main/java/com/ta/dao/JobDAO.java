@@ -46,6 +46,11 @@ public class JobDAO {
         FileManager.writeAll(filePath, Job.CSV_HEADER, rows);
     }
 
+    /** Write all jobs in one pass (e.g. after batch status updates). */
+    public void writeAllJobs(List<Job> jobs) {
+        persistAll(jobs);
+    }
+
     public Job findById(String jobId) {
         for (Job j : findAll()) {
             if (Objects.equals(j.getJobId(), jobId)) {
