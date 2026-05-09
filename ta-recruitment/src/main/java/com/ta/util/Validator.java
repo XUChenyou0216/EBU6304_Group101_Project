@@ -18,6 +18,13 @@ public class Validator {
         if ((err = requireNonEmpty(yearOfStudy, "Year of Study")) != null) return err;
         return null;
     }
+    public static String validateStrongPassword(String pwd) {
+        if (pwd == null || pwd.length() < 6) return "Password must be at least 6 characters.";
+        if (!pwd.matches(".*[A-Z].*")) return "Password must contain at least one uppercase letter.";
+        if (!pwd.matches(".*[a-z].*")) return "Password must contain at least one lowercase letter.";
+        if (!pwd.matches(".*[0-9].*")) return "Password must contain at least one digit.";
+        return null;
+    }
     public static String validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) return "Email is required.";
         if (!EMAIL_RE.matcher(email.trim()).matches()) return "Invalid email format.";
@@ -25,8 +32,7 @@ public class Validator {
     }
 
     public static String validatePassword(String pwd) {
-        if (pwd == null || pwd.length() < 6) return "Password must be at least 6 characters.";
-        return null;
+        return validateStrongPassword(pwd);
     }
 
     public static String validatePhone(String phone) {

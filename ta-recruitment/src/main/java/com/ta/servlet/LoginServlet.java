@@ -24,9 +24,13 @@ public class LoginServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        long currentTime = System.currentTimeMillis();
+
         String username = req.getParameter("username");
         String password = req.getParameter("password");
 
+        // 1. 基础非空校验
         String err = Validator.requireNonEmpty(username, "Username");
         if (err == null) err = Validator.requireNonEmpty(password, "Password");
         if (err != null) {
@@ -34,17 +38,53 @@ public class LoginServlet extends HttpServlet {
             req.getRequestDispatcher("/login.jsp").forward(req, resp); return;
         }
 
-        UserDAO dao = new UserDAO(SessionUtil.getDataDir(req));
-        User user = dao.findByUsername(username.trim());
+        String cleanUser = username.trim();
+        String lockKey = "lock_until_" + cleanUser;
+        String attemptKey = "login_attempts_" + cleanUser;
 
+        // 2. 核心拦截逻辑：针对当前输入的 username 检查锁定
+        Long lockUntil = (Long) session.getAttribute(lockKey);
+        if (lockUntil != null) {
+            if (currentTime < lockUntil) {
+                long remainingMins = (lockUntil - currentTime) / (60 * 1000) + 1;
+                req.setAttribute("error", "Account " + cleanUser + " is locked. Try again in " + remainingMins + " minutes.");
+                req.getRequestDispatcher("/login.jsp").forward(req, resp);
+                return;
+            } else {
+                // 时间已过，主动清理过期锁
+                session.removeAttribute(lockKey);
+            }
+        }
+
+        UserDAO dao = new UserDAO(SessionUtil.getDataDir(req));
+        User user = dao.findByUsername(cleanUser);
+
+        // 3. 验证逻辑
         if (user == null || !PasswordUtil.verify(password, user.getPasswordHash())) {
-            req.setAttribute("error", "Invalid username or password.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp); return;
+            Integer attempts = (Integer) session.getAttribute(attemptKey);
+            if (attempts == null) attempts = 0;
+            attempts++;
+
+            if (attempts >= 5) {
+                session.setAttribute(lockKey, currentTime + (5 * 60 * 1000));
+                session.removeAttribute(attemptKey);
+                req.setAttribute("error", "Too many failed attempts. " + cleanUser + " is locked.");
+            } else {
+                session.setAttribute(attemptKey, attempts);
+                req.setAttribute("error", "Invalid username or password.");
+            }
+            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            return;
         }
+
+        // 4. 账户状态检查
         if ("SUSPENDED".equals(user.getStatus())) {
-            req.setAttribute("error", "Account suspended. Contact admin.");
+            req.setAttribute("error", "Account suspended.");
             req.getRequestDispatcher("/login.jsp").forward(req, resp); return;
         }
+
+        session.removeAttribute(attemptKey);
+        session.removeAttribute(lockKey);
 
         SessionUtil.setCurrentUser(req, user);
         redirectToDashboard(req, resp);
@@ -53,6 +93,11 @@ public class LoginServlet extends HttpServlet {
     private void redirectToDashboard(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         User user = SessionUtil.getCurrentUser(req);
         String ctx = req.getContextPath();
+        if (user == null || user.getRole() == null) {
+            resp.sendRedirect(ctx + "/login.jsp");
+            return;
+        }
+
         switch (user.getRole().toUpperCase()) {
             case "TA":    resp.sendRedirect(ctx + "/ta/dashboard.jsp"); break;
             case "MO":    resp.sendRedirect(ctx + "/mo/dashboard.jsp"); break;

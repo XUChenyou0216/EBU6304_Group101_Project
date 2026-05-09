@@ -115,6 +115,15 @@ public class ApplicationDAO {
         FileManager.writeAll(filePath, Application.CSV_HEADER, newRows);
     }
 
+    /** Replace the entire applications file in one write (same row order as {@code applications}). */
+    public void persistAll(List<Application> applications) {
+        List<String> rows = new ArrayList<>(applications.size());
+        for (Application a : applications) {
+            rows.add(a.toCsvRow());
+        }
+        FileManager.writeAll(filePath, Application.CSV_HEADER, rows);
+    }
+
     public String generateNextId() {
         return FileManager.generateNextId(filePath, "APP");
     }
