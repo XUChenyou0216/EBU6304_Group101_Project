@@ -14,6 +14,16 @@
         <location>/error/403.jsp</location>
     </error-page>
 
+    <!-- P3: Admin Settings (AI config) -->
+    <servlet>
+        <servlet-name>AdminSettingsServlet</servlet-name>
+        <servlet-class>com.ta.servlet.AdminSettingsServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminSettingsServlet</servlet-name>
+        <url-pattern>/admin/settings</url-pattern>
+    </servlet-mapping>
+
     <!-- P5: Explicit servlet mapping for MO applicants review -->
     <servlet>
         <servlet-name>MoApplicantsServlet</servlet-name>

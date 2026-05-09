@@ -1,4 +1,6 @@
 userId,username,passwordHash,role,email,securityQuestion,securityAnswer,status
 U001,admin,8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918,ADMIN,admin@bupt.edu.cn,pet,admindog,ACTIVE
-U002,prof_wang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,wang@bupt.edu.cn,city,beijing,SUSPENDED
+U002,prof_wang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,wang@bupt.edu.cn,city,beijing,ACTIVE
 U003,student_li,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,li@bupt.edu.cn,school,bupt,ACTIVE
+U004,prof_li,008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601,MO,prof_li@email.com,pet,shit,ACTIVE
+U005,student_zhao,008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601,TA,zhao@bupt.edu.cn,pet,pet,ACTIVE
