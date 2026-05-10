@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recruitment Progress - TA Recruitment System</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/applicants-review.css">
+    <style>
+        .deadline-past { color: #dc2626; font-weight: 600; }
+    </style>
 </head>
 <body>
 <%@ include file="/jsp/common/header.jsp" %>
@@ -48,6 +52,7 @@
             <div class="stat-value" style="color:#2563eb;"><%= overallFillRate != null ? overallFillRate : 0 %>%</div>
         </div>
     </div>
+
 
     <div style="margin-top:32px;">
         <h3 style="margin-bottom:8px;">Progress by Job</h3>

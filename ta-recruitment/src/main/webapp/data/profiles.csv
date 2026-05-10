@@ -1,2 +1,3 @@
 userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath
-U003,null,Test,null,Year 1,null,uploads/U003_1776941155546.docx
+U003,123456,Lili,IST,Year 2,null,uploads/U003_1776941155546.docx
+U005,2024123456,Zhaotic,IST,Year 2,null,

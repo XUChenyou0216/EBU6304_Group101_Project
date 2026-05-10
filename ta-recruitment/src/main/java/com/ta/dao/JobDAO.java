@@ -2,8 +2,11 @@ package com.ta.dao;
 
 import com.ta.model.Job;
 import com.ta.util.FileManager;
+import com.ta.util.JobDeadlineUtil;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class JobDAO {
@@ -12,6 +15,21 @@ public class JobDAO {
     public JobDAO(String dataDir) { this.filePath = dataDir + "/jobs.csv"; }
 
     public List<Job> findAll() {
+        List<Job> jobs = readAllFromFile();
+        boolean changed = false;
+        for (Job j : jobs) {
+            if ("OPEN".equals(j.getStatus()) && JobDeadlineUtil.isPastDeadline(j.getDeadline())) {
+                j.setStatus("CLOSED");
+                changed = true;
+            }
+        }
+        if (changed) {
+            persistAll(jobs);
+        }
+        return jobs;
+    }
+
+    private List<Job> readAllFromFile() {
         List<Job> jobs = new ArrayList<>();
         for (String row : FileManager.readAll(filePath)) {
             Job j = Job.fromCsvRow(row);
@@ -20,8 +38,25 @@ public class JobDAO {
         return jobs;
     }
 
+    private void persistAll(List<Job> jobs) {
+        List<String> rows = new ArrayList<>();
+        for (Job j : jobs) {
+            rows.add(j.toCsvRow());
+        }
+        FileManager.writeAll(filePath, Job.CSV_HEADER, rows);
+    }
+
+    /** Write all jobs in one pass (e.g. after batch status updates). */
+    public void writeAllJobs(List<Job> jobs) {
+        persistAll(jobs);
+    }
+
     public Job findById(String jobId) {
-        for (Job j : findAll()) if (j.getJobId().equals(jobId)) return j;
+        for (Job j : findAll()) {
+            if (Objects.equals(j.getJobId(), jobId)) {
+                return j;
+            }
+        }
         return null;
     }
 

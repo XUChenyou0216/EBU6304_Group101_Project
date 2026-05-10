@@ -1,5 +1,8 @@
 jobId,moUserId,moduleCode,moduleName,jobTitle,description,requiredSkills,vacancies,deadline,workingPeriod,keyDuties,eligibility,status,createdDate
-J001,U002,"EBU6304 Software Engineering","Assist with lab sessions and marking","Java programming; Git experience",2,2026-04-30,OPEN,2026-03-20
-J002,U002,"EBU5476 Computer Networks","Help with tutorials and invigilation","Networking knowledge; Good communication",1,2026-04-15,OPEN,2026-03-20
-J003,U002,"1","Test","Test","1","1",1,2026-04-08,"1","1","1",OPEN,2026-04-08
-J004,U002,"test_close","test_close","test_close","test_close","test_close",2,2026-04-24,"1","test_close","test_close",CLOSED,2026-04-23
+J002,U002,"","EBU5476 Computer Networks","","Help with tutorials and invigilation","Networking knowledge; Good communication",1,2026-04-15,"","","",CLOSED,2026-03-20
+J003,U002,"1","Test","Test","1","1",1,2026-04-08,"1","1","1",CLOSED,2026-04-08
+J004,U004,"TEST01","Computer Vision","TA-CV","this a test","whatever",2,2026-05-17,"4 months","whatever","whatever",OPEN,2026-05-09
+J005,U004,"CS301","CS","TA-CS","job","whatever",3,2026-05-21,"3months","whatever","whatever",OPEN,2026-05-09
+J006,U004,"EBU001","Advanced Mathematics","TA-AM","maths","good at maths",4,2026-05-31,"2 months","reviewing homework","whatever",OPEN,2026-05-09
+J007,U004,"111","111","111","111","1",1,2026-05-29,"11","1","1",OPEN,2026-05-09
+J008,U004,"222","222","2","2","2",2,2026-05-26,"2","2","2",OPEN,2026-05-09

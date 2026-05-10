@@ -1,7 +1,0 @@
-userId,username,passwordHash,role,email,securityQuestion,securityAnswer,status
-U001,admin,8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918,ADMIN,admin@bupt.edu.cn,pet,admindog,ACTIVE
-U002,prof_wang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,wang@bupt.edu.cn,city,beijing,ACTIVE
-U003,student_li,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,li@bupt.edu.cn,school,bupt,ACTIVE
-U004,fmy,8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92,TA,3269995779@qq.com,pet,lly,ACTIVE
-U005,fmy1,54bb6a0d2ea7d49744e886aa20859d70b6fc4ee0b9f144353ecb4b39195767f3,MO,jp2023213675@qmul.ac.uk,pet,lly,ACTIVE
-U006,uuu,224587e618731d345b14d15f00bda01c255c476ed063b6e3b6e4a3bbe516b562,TA,2452365478@qq.com,city,Chongqing,ACTIVE

@@ -2,9 +2,11 @@ package com.ta.servlet;
 
 import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
+import com.ta.dao.NotificationDAO;
 import com.ta.dao.TAProfileDAO;
 import com.ta.model.Application;
 import com.ta.model.Job;
+import com.ta.model.Notification;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
 import javax.servlet.ServletException;
@@ -12,6 +14,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDate;
+import com.ta.util.JobDeadlineUtil;
 
 @WebServlet("/ta/apply")
 public class ApplyServlet extends HttpServlet {
@@ -86,6 +89,18 @@ public class ApplyServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/ta/jobs.jsp?error=duplicate");
             return;
         }
+
+        // Notify TA: application submitted
+        String today = LocalDate.now().toString();
+        NotificationDAO notifDAO = new NotificationDAO(dataDir);
+        String taMsg = "Your application for \"" + job.getJobTitle() + "\" (" + job.getModuleCode() + ") has been submitted successfully.";
+        notifDAO.save(new Notification(notifDAO.generateNextId(), currentUser.getUserId(),
+            "APPLICATION_SUBMITTED", taMsg, false, today));
+
+        // Notify MO: new application received
+        String moMsg = "A new application has been received for \"" + job.getJobTitle() + "\" (" + job.getModuleCode() + ").";
+        notifDAO.save(new Notification(notifDAO.generateNextId(), job.getMoUserId(),
+            "APPLICATION_SUBMITTED", moMsg, false, today));
 
         resp.sendRedirect(req.getContextPath() + "/ta/applications.jsp?success=applied");
     }

@@ -31,7 +31,7 @@
                 </div>
                 <div class="form-group">
                     <label>New Password</label>
-                    <input type="password" name="newPassword" placeholder="Minimum 6 characters" required minlength="6">
+                    <input type="password" name="newPassword" placeholder="Min 6 chars, 1 uppercase, 1 lowercase, 1 number." required minlength="6">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">Reset Password</button>
             </form>

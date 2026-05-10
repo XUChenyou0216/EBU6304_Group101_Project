@@ -6,6 +6,7 @@ import com.ta.model.Application;
 import com.ta.model.Job;
 import com.ta.model.JobProgressView;
 import com.ta.model.User;
+import com.ta.util.JobDeadlineUtil;
 import com.ta.util.SessionUtil;
 
 import javax.servlet.ServletException;
@@ -61,6 +62,19 @@ public class MoProgressServlet extends HttpServlet {
             totalAccepted += acceptedCount;
             totalVacancies += Math.max(job.getVacancies(), 0);
 
+            String statusClass;
+            String statusLabel;
+            if ("OPEN".equalsIgnoreCase(job.getStatus())) {
+                statusClass = "active";
+                statusLabel = "Active";
+            } else if (JobDeadlineUtil.isPastDeadline(job.getDeadline())) {
+                statusClass = "expired";
+                statusLabel = "Expired";
+            } else {
+                statusClass = "closed";
+                statusLabel = "Closed";
+            }
+
             progressRows.add(new JobProgressView(
                     getDisplayTitle(job),
                     job.getModuleName(),
@@ -69,8 +83,8 @@ public class MoProgressServlet extends HttpServlet {
                     underReviewCount,
                     acceptedCount,
                     calculateFillRate(acceptedCount, job.getVacancies()),
-                    "OPEN".equalsIgnoreCase(job.getStatus()) ? "active" : "closed",
-                    "OPEN".equalsIgnoreCase(job.getStatus()) ? "Active" : "Closed"
+                    statusClass,
+                    statusLabel
             ));
         }
 

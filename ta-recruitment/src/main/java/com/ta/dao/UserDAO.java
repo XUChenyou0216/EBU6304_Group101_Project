@@ -63,7 +63,17 @@ public class UserDAO {
             return newRows;
         });
     }
-
+    public void delete(String userId) {
+        List<String> rows = FileManager.readAll(filePath);
+        List<String> newRows = new ArrayList<>();
+        for (String row : rows) {
+            User u = User.fromCsvRow(row);
+            if (u != null && !u.getUserId().equals(userId)) {
+                newRows.add(row);
+            }
+        }
+        FileManager.writeAll(filePath, User.CSV_HEADER, newRows);
+    }
     public String generateNextId() {
         return FileManager.generateNextId(filePath, "U");
     }

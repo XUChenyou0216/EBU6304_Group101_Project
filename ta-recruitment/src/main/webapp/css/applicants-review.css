@@ -1906,3 +1906,40 @@
 .mo-ar-pagination .page-num:hover:not(.active) {
   background: #f8fafc;
 }
+
+/* MO applicants.jsp — per-row review note + status */
+.mo-applicant-form {
+  margin: 0;
+}
+.mo-review-note {
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  border: 1px solid var(--border-solid, #e2e8f0);
+  border-radius: 8px;
+  resize: vertical;
+  min-height: 56px;
+  font-family: inherit;
+}
+.mo-review-note:focus {
+  outline: none;
+  border-color: var(--primary, #2563eb);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+.mo-applicant-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mo-status-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border-solid, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 130px;
+}
