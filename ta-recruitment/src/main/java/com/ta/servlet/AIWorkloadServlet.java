@@ -119,11 +119,11 @@ public class AIWorkloadServlet extends HttpServlet {
         }
 
         // ── 2. Detect overloaded TAs (always, regardless of candidates) ───────
-        // Uses >= so TAs exactly at limit are also flagged
+        // Uses > so TAs exactly at limit are also flagged
         List<AdminWorkloadServlet.TaWorkloadRow> overloadedRows = new ArrayList<>();
         for (User ta : allTas) {
             int hrs = taHours.get(ta.getUserId());
-            if (hrs < AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) continue;
+            if (hrs <= AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) continue;
             TAProfile p = profileDAO.findByUserId(ta.getUserId());
             Set<String> labels = new LinkedHashSet<>();
             for (Application a : taApps.get(ta.getUserId())) {
@@ -220,10 +220,10 @@ public class AIWorkloadServlet extends HttpServlet {
         sb.append("Policy: each accepted assignment = ").append(hpa)
           .append(" hrs estimated work. The limit is ").append(limit).append(" hrs per TA.\n\n");
 
-        sb.append("OVERLOADED TAs (at or above ").append(limit).append(" hrs) — need reassignment:\n");
+        sb.append("OVERLOADED TAs (above ").append(limit).append(" hrs) — need reassignment:\n");
         for (User ta : allTas) {
             int hrs = taHours.get(ta.getUserId());
-            if (hrs < limit) continue;
+            if (hrs <= limit) continue;
             TAProfile p = profileDAO.findByUserId(ta.getUserId());
             sb.append("- ").append(displayName(p, ta)).append(" [").append(ta.getUserId())
               .append("]: ").append(hrs).append(" hrs\n  Assignments:\n");
