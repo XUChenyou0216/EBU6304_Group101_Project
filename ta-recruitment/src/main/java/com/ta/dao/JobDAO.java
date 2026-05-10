@@ -37,16 +37,28 @@ public class JobDAO {
         FileManager.appendRow(filePath, Job.CSV_HEADER, job.toCsvRow());
     }
 
-    public void update(Job updated) {
-        List<String> rows = FileManager.readAll(filePath);
-        List<String> newRows = new ArrayList<>();
-        for (String row : rows) {
-            Job j = Job.fromCsvRow(row);
-            if (j != null && j.getJobId().equals(updated.getJobId()))
-                newRows.add(updated.toCsvRow());
-            else newRows.add(row);
+    public String saveWithNextId(Job job) {
+        String generatedId = FileManager.appendWithGeneratedId(filePath, Job.CSV_HEADER, "J", id -> {
+            job.setJobId(id);
+            return job.toCsvRow();
+        });
+        if (generatedId != null) {
+            job.setJobId(generatedId);
         }
-        FileManager.writeAll(filePath, Job.CSV_HEADER, newRows);
+        return generatedId;
+    }
+
+    public void update(Job updated) {
+        FileManager.updateRows(filePath, Job.CSV_HEADER, rows -> {
+            List<String> newRows = new ArrayList<>();
+            for (String row : rows) {
+                Job j = Job.fromCsvRow(row);
+                if (j != null && j.getJobId().equals(updated.getJobId()))
+                    newRows.add(updated.toCsvRow());
+                else newRows.add(row);
+            }
+            return newRows;
+        });
     }
 
     public String generateNextId() {

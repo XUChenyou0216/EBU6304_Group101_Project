@@ -35,16 +35,33 @@ public class UserDAO {
         FileManager.appendRow(filePath, User.CSV_HEADER, user.toCsvRow());
     }
 
+    public boolean saveIfUsernameAvailable(User user) {
+        return FileManager.appendIfAbsent(
+                filePath,
+                User.CSV_HEADER,
+                row -> {
+                    User existing = User.fromCsvRow(row);
+                    return existing != null && existing.getUsername().equalsIgnoreCase(user.getUsername());
+                },
+                rows -> {
+                    String id = FileManager.nextId(rows, "U");
+                    user.setUserId(id);
+                    return user.toCsvRow();
+                }
+        );
+    }
+
     public void update(User updated) {
-        List<String> rows = FileManager.readAll(filePath);
-        List<String> newRows = new ArrayList<>();
-        for (String row : rows) {
-            User u = User.fromCsvRow(row);
-            if (u != null && u.getUserId().equals(updated.getUserId()))
-                newRows.add(updated.toCsvRow());
-            else newRows.add(row);
-        }
-        FileManager.writeAll(filePath, User.CSV_HEADER, newRows);
+        FileManager.updateRows(filePath, User.CSV_HEADER, rows -> {
+            List<String> newRows = new ArrayList<>();
+            for (String row : rows) {
+                User u = User.fromCsvRow(row);
+                if (u != null && u.getUserId().equals(updated.getUserId()))
+                    newRows.add(updated.toCsvRow());
+                else newRows.add(row);
+            }
+            return newRows;
+        });
     }
 
     public String generateNextId() {

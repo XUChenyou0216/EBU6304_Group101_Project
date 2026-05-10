@@ -112,7 +112,7 @@ public class PostJobServlet extends HttpServlet {
         } else {
             // Create new job
             Job newJob = new Job(
-                    jobDAO.generateNextId(),
+                    "",
                     currentUser.getUserId(),
                     moduleCode,
                     moduleName,
@@ -127,7 +127,7 @@ public class PostJobServlet extends HttpServlet {
                     "OPEN",
                     LocalDate.now().toString()
             );
-            jobDAO.save(newJob);
+            jobDAO.saveWithNextId(newJob);
             response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?success=posted");
         }
     }
