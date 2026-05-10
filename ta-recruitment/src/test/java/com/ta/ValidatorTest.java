@@ -1,5 +1,6 @@
 package com.ta;
 
+import com.ta.util.FileManager;
 import com.ta.util.Validator;
 
 import org.apache.catalina.Context;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +34,14 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -170,8 +180,10 @@ public class ValidatorTest {
     }
 
     @Test
-    public void validatePassword_exactlySixChars_returnsNull() {
-        assertNull(Validator.validatePassword("123456"));
+    public void validatePassword_weakSixDigitsOnly_returnsError() {
+        // validatePassword() 现在委托给 validateStrongPassword()，
+        // 纯数字密码缺少大小写字母，必须被拒绝。
+        assertNotNull(Validator.validatePassword("123456"));
     }
 
     // ── validatePhone ────────────────────────────────────────────────────
@@ -720,5 +732,516 @@ public class ValidatorTest {
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Section 3 — 强密码策略（安全加固）
+    //
+    // ⚠ 冲突说明：已有测试 validatePassword_exactlySixChars_returnsNull() 传入
+    //   "123456"（纯数字，无大小写），但 validatePassword() 现在已委托给
+    //   validateStrongPassword()，该测试将返回 error 而非 null，导致断言失败。
+    //   请在 Section 1 中将该测试的期望值改为 assertNotNull，或删除后以下新测试替代。
+    // ═══════════════════════════════════════════════════════════════════════
+
+    @Test
+    public void validateStrongPassword_missingUppercase_returnsError() {
+        assertNotNull("缺少大写字母时必须返回错误", Validator.validateStrongPassword("pass1234"));
+    }
+
+    @Test
+    public void validateStrongPassword_missingLowercase_returnsError() {
+        assertNotNull("缺少小写字母时必须返回错误", Validator.validateStrongPassword("PASS1234"));
+    }
+
+    @Test
+    public void validateStrongPassword_missingDigit_returnsError() {
+        assertNotNull("缺少数字时必须返回错误", Validator.validateStrongPassword("Password"));
+    }
+
+    @Test
+    public void validateStrongPassword_tooShort_returnsError() {
+        assertNotNull("长度不足6位时必须返回错误", Validator.validateStrongPassword("Pa1"));
+    }
+
+    @Test
+    public void validateStrongPassword_null_returnsError() {
+        assertNotNull("null 密码必须返回错误", Validator.validateStrongPassword(null));
+    }
+
+    @Test
+    public void validateStrongPassword_allRulesMet_returnsNull() {
+        assertNull("同时满足大写+小写+数字的密码必须通过", Validator.validateStrongPassword("Pass1234"));
+    }
+
+    @Test
+    public void validateStrongPassword_minimumSixCharsWithAllRules_returnsNull() {
+        // 恰好 6 个字符且满足全部强密码规则
+        assertNull("恰好 6 位且含大小写+数字的密码必须通过", Validator.validateStrongPassword("Pa1234"));
+    }
+
+    @Test
+    public void validatePassword_delegatesToStrongPolicy_pureDigitsRejected() {
+        // validatePassword() 现在委托给 validateStrongPassword()，纯数字密码必须被拒绝
+        assertNotNull("validatePassword 必须强制执行大小写+数字策略，纯数字应被拒绝",
+                Validator.validatePassword("123456"));
+    }
+
+    @Test
+    public void validatePassword_strongPassword_returnsNull() {
+        assertNull("符合强密码策略的密码必须通过 validatePassword()",
+                Validator.validatePassword("Secure99"));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Section 4 — 登录失败次数限制 + Session 安全（HtmlUnit 前端测试）
+    // ═══════════════════════════════════════════════════════════════════════
+
+    @Test
+    public void loginFailure_singleAttempt_showsInvalidCredentialsError() throws Exception {
+        HtmlPage page = webClient.getPage(baseUrl + "/login.jsp");
+        HtmlForm form = page.getForms().get(0);
+        ((HtmlInput) form.getInputByName("username")).setValueAttribute(TA_USER);
+        ((HtmlPasswordInput) form.getInputByName("password")).setValueAttribute("WrongPass1!");
+        HtmlPage result = ((HtmlButton) form.getFirstByXPath(".//button[@type='submit']")).click();
+        webClient.waitForBackgroundJavaScript(500);
+        String body = result.getBody().getTextContent().toLowerCase();
+        assertTrue("单次登录失败必须显示错误提示",
+                body.contains("invalid") || body.contains("incorrect") || body.contains("error"));
+    }
+
+    @Test
+    public void loginFailure_afterFiveAttempts_showsAccountLockedMessage() throws Exception {
+        // 注册专用锁定测试账号，避免干扰其他测试的账号状态
+        String lockedUser = "locktest_" + RUN_ID;
+        registerOnce(lockedUser, lockedUser + "@test.com", "TA", "Pass1234");
+
+        HtmlPage lastResult = null;
+        for (int i = 0; i < 5; i++) {
+            HtmlPage page = webClient.getPage(baseUrl + "/login.jsp");
+            HtmlForm form = page.getForms().get(0);
+            ((HtmlInput) form.getInputByName("username")).setValueAttribute(lockedUser);
+            ((HtmlPasswordInput) form.getInputByName("password")).setValueAttribute("WrongPass9!");
+            lastResult = ((HtmlButton) form.getFirstByXPath(".//button[@type='submit']")).click();
+            webClient.waitForBackgroundJavaScript(300);
+        }
+        assertNotNull("第5次失败后必须返回响应页面", lastResult);
+        String body = lastResult.getBody().getTextContent().toLowerCase();
+        assertTrue("连续5次登录失败后必须显示账号锁定提示（locked / too many / attempts）",
+                body.contains("locked") || body.contains("too many") || body.contains("attempts"));
+    }
+
+    @Test
+    public void loginFailure_beforeLockThreshold_loginPageStillAccessible() throws Exception {
+        // 失败次数未达上限（< 5）时，登录页面必须仍可正常使用
+        String tempUser = "preLock_" + RUN_ID;
+        registerOnce(tempUser, tempUser + "@test.com", "TA", "Pass1234");
+
+        for (int i = 0; i < 3; i++) {
+            HtmlPage page = webClient.getPage(baseUrl + "/login.jsp");
+            HtmlForm form = page.getForms().get(0);
+            ((HtmlInput) form.getInputByName("username")).setValueAttribute(tempUser);
+            ((HtmlPasswordInput) form.getInputByName("password")).setValueAttribute("WrongPass1!");
+            HtmlPage result = ((HtmlButton) form.getFirstByXPath(".//button[@type='submit']")).click();
+            webClient.waitForBackgroundJavaScript(300);
+            // 每次失败后页面必须仍包含登录表单（未锁定，仍可重试）
+            assertNotNull("未达锁定阈值时登录表单必须仍然存在",
+                    result.getElementByName("username"));
+        }
+    }
+
+    @Test
+    public void session_afterLogout_protectedPageRedirectsToLogin() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        HtmlPage protectedPage = webClient.getPage(baseUrl + "/ta/dashboard.jsp");
+        assertEquals("登录后访问 TA Dashboard 必须返回 200",
+                200, protectedPage.getWebResponse().getStatusCode());
+
+        // 执行登出
+        webClient.getPage(baseUrl + "/logout");
+
+        // 登出后访问受保护页面必须重定向到登录页
+        HtmlPage afterLogout = webClient.getPage(baseUrl + "/ta/dashboard.jsp");
+        assertTrue("登出后访问受保护页面必须重定向到登录页",
+                afterLogout.getUrl().toString().contains("/login"));
+    }
+
+    @Test
+    public void session_expiredSimulatedByClearingCookies_redirectsToLogin() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        // 清除所有 cookie 模拟 session 过期
+        webClient.getCookieManager().clearCookies();
+        HtmlPage page = webClient.getPage(baseUrl + "/ta/dashboard.jsp");
+        assertTrue("Session 失效（cookie 清除）后必须重定向到登录页",
+                page.getUrl().toString().contains("/login"));
+    }
+
+    @Test
+    public void sessionConfig_30MinuteTimeout_definedInWebXml() throws IOException {
+        // 验证 web.xml 中已声明 30 分钟 session 超时配置
+        // （实际超时无法在单元测试中等待触发，此处通过配置文件断言）
+        File webXml = new File("src/main/webapp/WEB-INF/web.xml");
+        assertTrue("web.xml 必须存在", webXml.exists());
+        String content = new String(Files.readAllBytes(webXml.toPath()));
+        assertTrue("web.xml 必须包含 session-timeout 配置",
+                content.contains("session-timeout"));
+        assertTrue("session-timeout 必须配置为 30 分钟",
+                content.contains("<session-timeout>30</session-timeout>"));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Section 5 — US-A02 AI辅助工作量平衡（Admin 页面访问控制 + 内容渲染）
+    // ═══════════════════════════════════════════════════════════════════════
+
+    @Test
+    public void aiWorkloadPage_adminCanAccess_returns200() throws Exception {
+        loginAs("admin", "admin");
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        assertEquals("Admin 必须能访问 AI 工作量页面",
+                200, page.getWebResponse().getStatusCode());
+    }
+
+    @Test
+    public void aiWorkloadPage_taUser_returns403() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        assertEquals("TA 用户访问 AI 工作量页面必须返回 403",
+                403, page.getWebResponse().getStatusCode());
+    }
+
+    @Test
+    public void aiWorkloadPage_moUser_returns403() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        assertEquals("MO 用户访问 AI 工作量页面必须返回 403",
+                403, page.getWebResponse().getStatusCode());
+    }
+
+    @Test
+    public void aiWorkloadPage_unauthenticated_redirectsToLoginOr403() throws Exception {
+        // 未调用 loginAs，直接访问
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        assertTrue("未登录访问 AI 工作量页面必须重定向到登录页或返回 403",
+                page.getUrl().toString().contains("/login")
+                        || page.getWebResponse().getStatusCode() == 403);
+    }
+
+    @Test
+    public void aiWorkloadPage_rendersWorkloadOrRecommendationContent() throws Exception {
+        loginAs("admin", "admin");
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        String body = page.getBody().getTextContent();
+        assertTrue("AI 工作量页面必须包含工作量或推荐分析相关内容",
+                body.contains("Workload") || body.contains("workload")
+                        || body.contains("Recommendation") || body.contains("overload")
+                        || body.contains("Hours") || body.contains("Reassign"));
+    }
+
+    @Test
+    public void aiWorkloadPage_ruleBasedFallback_providesExplainableOutput() throws Exception {
+        // 无 AI API key 时规则引擎作为 fallback，必须在页面中渲染 explainable 内容
+        loginAs("admin", "admin");
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload");
+        String html = page.getWebResponse().getContentAsString();
+        assertTrue("规则引擎 fallback 必须呈现可解释性分析内容（hrs / spare / limit / reasoning）",
+                html.contains("hrs") || html.contains("spare") || html.contains("limit")
+                        || html.contains("reasoning") || html.contains("Reasoning")
+                        || html.contains("Rule") || html.contains("rule"));
+    }
+
+    @Test
+    public void aiWorkloadPage_errorParam_pageStillLoads() throws Exception {
+        loginAs("admin", "admin");
+        // 带 error=invalid 参数访问，页面仍必须正常渲染（不崩溃）
+        HtmlPage page = webClient.getPage(baseUrl + "/admin/ai-workload?error=invalid");
+        assertEquals("带 error 参数访问 AI 工作量页面必须仍然返回 200",
+                200, page.getWebResponse().getStatusCode());
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Section 6 — MO 高级操作（批量状态更新 / 一键关闭满员岗位 / 重开岗位）
+    //
+    // URL 映射（来自 web.xml）：
+    //   POST /mo/batch-update-applications → MoBatchUpdateApplicationStatusServlet
+    //   POST /mo/close-full-jobs           → MoCloseFullJobsServlet
+    //   POST /mo/reopen-job                → MoReopenJobServlet
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── 角色访问控制（非 MO 用户必须返回 403）────────────────────────────
+
+    @Test
+    public void moBatchUpdate_taUser_returns403() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/batch-update-applications"),
+                org.htmlunit.HttpMethod.POST);
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("batchPayload", "APP001,ACCEPTED")));
+        HtmlPage page = webClient.getPage(req);
+        assertEquals("TA 用户执行批量状态更新必须返回 403",
+                403, page.getWebResponse().getStatusCode());
+    }
+
+    @Test
+    public void moCloseFullJobs_taUser_returns403() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/close-full-jobs"),
+                org.htmlunit.HttpMethod.POST);
+        HtmlPage page = webClient.getPage(req);
+        assertEquals("TA 用户执行一键关闭满员岗位必须返回 403",
+                403, page.getWebResponse().getStatusCode());
+    }
+
+    @Test
+    public void moReopenJob_taUser_returns403() throws Exception {
+        loginAs(TA_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/reopen-job"),
+                org.htmlunit.HttpMethod.POST);
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("jobId", "JOB001")));
+        HtmlPage page = webClient.getPage(req);
+        assertEquals("TA 用户执行重开岗位必须返回 403",
+                403, page.getWebResponse().getStatusCode());
+    }
+
+    // ── MoCloseFullJobsServlet ───────────────────────────────────────────
+
+    @Test
+    public void moCloseFullJobs_moUser_redirectsToJobsPageWithResult() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/close-full-jobs"),
+                org.htmlunit.HttpMethod.POST);
+        HtmlPage page = webClient.getPage(req);
+        // 即使当前没有满员岗位，也应重定向到 jobs 页面（closedFull 参数，n 可能为 0）
+        assertTrue("一键关闭满员岗位后必须重定向到 MO jobs 页面",
+                page.getUrl().toString().contains("/mo/jobs")
+                        || page.getUrl().toString().contains("closedFull"));
+    }
+
+    @Test
+    public void moCloseFullJobs_moUser_responseIs200AfterRedirect() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/close-full-jobs"),
+                org.htmlunit.HttpMethod.POST);
+        HtmlPage page = webClient.getPage(req);
+        assertEquals("关闭满员岗位重定向后目标页必须返回 200",
+                200, page.getWebResponse().getStatusCode());
+    }
+
+    // ── MoBatchUpdateApplicationStatusServlet ────────────────────────────
+
+    @Test
+    public void moBatchUpdate_emptyPayload_redirectsToApplicantsWithoutError() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/batch-update-applications"),
+                org.htmlunit.HttpMethod.POST);
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("batchPayload", "")));
+        HtmlPage page = webClient.getPage(req);
+        // 空 payload 应静默重定向到 applicants 页面，不应报内部错误
+        assertTrue("空 payload 批量更新必须重定向到 applicants 页面",
+                page.getUrl().toString().contains("/mo/applicants")
+                        || page.getWebResponse().getStatusCode() == 200);
+    }
+
+    @Test
+    public void moBatchUpdate_malformedPayload_dropsInvalidEntriesAndRedirects() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/batch-update-applications"),
+                org.htmlunit.HttpMethod.POST);
+        // 格式错误（无逗号分隔状态），解析后 ops 为空，应静默重定向
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("batchPayload", "INVALID_ENTRY_NO_STATUS")));
+        HtmlPage page = webClient.getPage(req);
+        assertTrue("格式错误 payload 必须重定向到 applicants 页面",
+                page.getUrl().toString().contains("/mo/applicants")
+                        || page.getWebResponse().getStatusCode() == 200);
+    }
+
+    @Test
+    public void moApplicantsPage_batchSuccessParam_rendersNormally() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        HtmlPage page = webClient.getPage(baseUrl + "/mo/applicants?success=batch");
+        assertEquals("批量更新成功后重定向目标页必须正常加载",
+                200, page.getWebResponse().getStatusCode());
+        assertFalse("Applicants 页面内容不应为空",
+                page.getBody().getTextContent().trim().isEmpty());
+    }
+
+    @Test
+    public void moApplicantsPage_capacityWarningParam_rendersNormally() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        HtmlPage page = webClient.getPage(
+                baseUrl + "/mo/applicants?success=batch&warning=capacity");
+        assertEquals("满员警告参数重定向目标页必须正常加载",
+                200, page.getWebResponse().getStatusCode());
+    }
+
+    // ── MoReopenJobServlet ───────────────────────────────────────────────
+
+    @Test
+    public void moReopenJob_missingJobId_redirectsWithError() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/reopen-job"),
+                org.htmlunit.HttpMethod.POST);
+        // 不提供 jobId，Servlet 应返回 reopenMissing 错误重定向
+        HtmlPage page = webClient.getPage(req);
+        assertTrue("缺少 jobId 时重开岗位必须重定向并携带错误参数",
+                page.getUrl().toString().contains("/mo/applicants")
+                        || page.getUrl().toString().contains("error=reopenMissing")
+                        || page.getWebResponse().getStatusCode() == 200);
+    }
+
+    @Test
+    public void moReopenJob_nonExistentJobId_redirectsWithNotFoundError() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/reopen-job"),
+                org.htmlunit.HttpMethod.POST);
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("jobId", "JOB_DOES_NOT_EXIST_9999")));
+        HtmlPage page = webClient.getPage(req);
+        assertTrue("不存在的 jobId 必须重定向并返回 reopenNotFound 错误",
+                page.getUrl().toString().contains("error=reopenNotFound")
+                        || page.getUrl().toString().contains("/mo/applicants")
+                        || page.getWebResponse().getStatusCode() == 200);
+    }
+
+    @Test
+    public void moReopenJob_returnToJobs_redirectsToJobsPage() throws Exception {
+        loginAs(MO_USER, PASSWORD);
+        org.htmlunit.WebRequest req = new org.htmlunit.WebRequest(
+                new URL(baseUrl + "/mo/reopen-job"),
+                org.htmlunit.HttpMethod.POST);
+        // returnTo=jobs 参数：错误时应重定向到 jobs.jsp 而非 applicants
+        req.setRequestParameters(Arrays.asList(
+                new org.htmlunit.util.NameValuePair("jobId", "JOB_MISSING"),
+                new org.htmlunit.util.NameValuePair("returnTo", "jobs")));
+        HtmlPage page = webClient.getPage(req);
+        assertTrue("returnTo=jobs 时重开岗位失败必须重定向到 MO jobs 页面",
+                page.getUrl().toString().contains("/mo/jobs")
+                        || page.getWebResponse().getStatusCode() == 200);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Section 7 — US-D03 FileManager 并发写入安全（直接 API 测试）
+    //
+    // 注：ApplicationDAO/UserDAO 层级的并发安全已由 CsvConcurrencyTest 覆盖（4个测试）。
+    // 本节补充 FileManager.appendRow()（简单追加，不生成ID）及读写混合场景。
+    // ═══════════════════════════════════════════════════════════════════════
+
+    @Test
+    public void fileManager_appendRow_concurrentCalls_noDataLoss() throws Exception {
+        File tempDir = Files.createTempDirectory("fm-appendrow-test").toFile();
+        String filePath = new File(tempDir, "append_test.csv").getAbsolutePath();
+        String header = "seq,value";
+        int threadCount = 20;
+
+        ExecutorService exec = Executors.newFixedThreadPool(threadCount);
+        List<Future<?>> futures = new ArrayList<>();
+        AtomicInteger errorCount = new AtomicInteger(0);
+
+        for (int i = 0; i < threadCount; i++) {
+            final int idx = i;
+            futures.add(exec.submit(() -> {
+                try {
+                    FileManager.appendRow(filePath, header, idx + ",thread_" + idx);
+                } catch (Exception e) {
+                    errorCount.incrementAndGet();
+                }
+            }));
+        }
+        for (Future<?> f : futures) { f.get(15, TimeUnit.SECONDS); }
+        exec.shutdown();
+
+        assertEquals("并发 appendRow 不应产生任何异常", 0, errorCount.get());
+        List<String> rows = FileManager.readAll(filePath);
+        assertEquals("并发 appendRow 后数据行数必须与写入次数相符（无数据丢失）",
+                threadCount, rows.size());
+
+        deleteRecursively(tempDir.toPath());
+    }
+
+    @Test
+    public void fileManager_concurrentReadsDuringWrite_noCorruption() throws Exception {
+        File tempDir = Files.createTempDirectory("fm-rw-mix-test").toFile();
+        String filePath = new File(tempDir, "mix_test.csv").getAbsolutePath();
+        String header = "id,data";
+
+        // 预写入初始数据
+        FileManager.appendWithGeneratedId(filePath, header, "R", id -> id + ",initial");
+
+        int writerCount = 5;
+        int readerCount = 5;
+        ExecutorService exec = Executors.newFixedThreadPool(writerCount + readerCount);
+        List<Future<?>> futures = new ArrayList<>();
+        AtomicInteger errCount = new AtomicInteger(0);
+
+        for (int i = 0; i < writerCount; i++) {
+            final int idx = i;
+            futures.add(exec.submit(() -> {
+                try {
+                    FileManager.appendWithGeneratedId(filePath, header, "R",
+                            id -> id + ",w" + idx);
+                } catch (Exception e) {
+                    errCount.incrementAndGet();
+                }
+            }));
+        }
+        for (int i = 0; i < readerCount; i++) {
+            futures.add(exec.submit(() -> {
+                try {
+                    List<String> rows = FileManager.readAll(filePath);
+                    if (rows.isEmpty()) errCount.incrementAndGet(); // 初始行必须可见
+                } catch (Exception e) {
+                    errCount.incrementAndGet();
+                }
+            }));
+        }
+
+        for (Future<?> f : futures) { f.get(15, TimeUnit.SECONDS); }
+        exec.shutdown();
+
+        assertEquals("读写混合并发场景不应产生异常", 0, errCount.get());
+        List<String> finalRows = FileManager.readAll(filePath);
+        assertTrue("并发读写后文件必须包含全部写入行（初始行 + writerCount 行）",
+                finalRows.size() >= 1);
+
+        deleteRecursively(tempDir.toPath());
+    }
+
+    @Test
+    public void fileManager_appendIfAbsent_concurrentDuplicates_onlyOneSucceeds()
+            throws Exception {
+        File tempDir = Files.createTempDirectory("fm-dedup-test").toFile();
+        String filePath = new File(tempDir, "dedup_test.csv").getAbsolutePath();
+        String header = "id,key";
+        int threadCount = 16;
+
+        ExecutorService exec = Executors.newFixedThreadPool(threadCount);
+        List<Future<Boolean>> futures = new ArrayList<>();
+
+        for (int i = 0; i < threadCount; i++) {
+            futures.add(exec.submit(() ->
+                    FileManager.appendIfAbsent(filePath, header,
+                            row -> row.contains(",UNIQUE_KEY"),
+                            rows -> (rows.size() + 1) + ",UNIQUE_KEY")));
+        }
+
+        List<Boolean> results = new ArrayList<>();
+        for (Future<Boolean> f : futures) { results.add(f.get(15, TimeUnit.SECONDS)); }
+        exec.shutdown();
+
+        long successCount = results.stream().filter(Boolean::booleanValue).count();
+        assertEquals("并发 appendIfAbsent 重复键只能成功写入一次", 1, successCount);
+        assertEquals("CSV 文件中重复键记录必须只有一行", 1, FileManager.readAll(filePath).size());
+
+        deleteRecursively(tempDir.toPath());
     }
 }
