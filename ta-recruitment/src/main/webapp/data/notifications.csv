@@ -1,34 +1,26 @@
 notificationId,userId,type,message,isRead,createdDate
-NTF001,U004,JOB_POSTED,"Job ""EBU5474 Computer — Job Title"" has been posted successfully.",true,2026-05-02
-NTF002,U004,JOB_POSTED,"Job ""EBU5474 Computer — Job Title"" has been posted successfully.",true,2026-05-02
-NTF003,U003,APPLICATION_SUBMITTED,"Your application for ""Job Title"" (Module Code ) has been submitted successfully.",true,2026-05-02
-NTF004,U004,APPLICATION_SUBMITTED,"A new application has been received for ""Job Title"" (Module Code ).",true,2026-05-02
-NTF005,U003,APPLICATION_SUBMITTED,"Your application for ""Job Title"" (Module Code ) has been submitted successfully.",true,2026-05-02
-NTF006,U004,APPLICATION_SUBMITTED,"A new application has been received for ""Job Title"" (Module Code ).",true,2026-05-02
-NTF007,U002,JOB_POSTED,"Job ""EBU5474 Computer Network — Job Title1"" has been posted successfully.",true,2026-05-02
-NTF008,U002,JOB_POSTED,"Job ""Testaa — Test"" has been posted successfully.",true,2026-05-02
-NTF009,U003,APPLICATION_SUBMITTED,"Your application for ""Job Title1"" (Module Code ) has been submitted successfully.",true,2026-05-02
-NTF010,U002,APPLICATION_SUBMITTED,"A new application has been received for ""Job Title1"" (Module Code ).",true,2026-05-02
-NTF011,U003,APPLICATION_SUBMITTED,"Your application for ""Test"" (1) has been submitted successfully.",true,2026-05-02
-NTF012,U002,APPLICATION_SUBMITTED,"A new application has been received for ""Test"" (1).",true,2026-05-02
-NTF013,U003,STATUS_UPDATED,"Your application for ""Test"" (1) has been updated to: SUBMITTED.",true,2026-05-02
-NTF014,U003,STATUS_UPDATED,"Your application for ""Test"" (1) has been updated to: ACCEPTED.",true,2026-05-02
-NTF015,U003,STATUS_UPDATED,"Your application for ""Job Title1"" (Module Code ) has been updated to: ACCEPTED.",true,2026-05-02
-NTF016,U002,JOB_POSTED,"Job ""Testaa — Test222"" has been posted successfully.",true,2026-05-02
-NTF017,U003,APPLICATION_SUBMITTED,"Your application for ""Test222"" (1223) has been submitted successfully.",true,2026-05-02
-NTF018,U002,APPLICATION_SUBMITTED,"A new application has been received for ""Test222"" (1223).",true,2026-05-02
-NTF019,U003,STATUS_UPDATED,"Your application for ""Test222"" (1223) has been updated to: ACCEPTED.",true,2026-05-02
-NTF020,U003,STATUS_UPDATED,"Your application for ""Job Title"" (Module Code ) has been updated to: ACCEPTED.",true,2026-05-02
-NTF021,U001,WORKLOAD_ALERT,"Workload alert [TA:U003]: student_li has 64h (limit 48h).",true,2026-05-02
-NTF022,U001,WORKLOAD_ALERT,"Workload alert [TA:U003]: student_li has 64h (limit 48h).",true,2026-05-02
-NTF023,U001,WORKLOAD_ALERT,"Workload alert [TA:U003]: student_li has 64h (limit 48h).",true,2026-05-02
-NTF024,U001,WORKLOAD_ALERT,"Workload alert [TA:U003]: student_li has 64h (limit 48h).",true,2026-05-02
-NTF025,U006,JOB_POSTED,"Job ""Validator Test Module — BellColor-1777715948362"" has been posted successfully.",false,2026-05-02
-NTF026,U006,JOB_POSTED,"Job ""Validator Test Module — ColorTest-1777715948931"" has been posted successfully.",false,2026-05-02
-NTF027,U006,JOB_POSTED,"Job ""Validator Test Module — VT-Job-1777715949058"" has been posted successfully.",false,2026-05-02
-NTF028,U008,JOB_POSTED,"Job ""Validator Test Module — BellColor-1777716002568"" has been posted successfully.",false,2026-05-02
-NTF029,U008,JOB_POSTED,"Job ""Validator Test Module — ColorTest-1777716002869"" has been posted successfully.",false,2026-05-02
-NTF030,U008,JOB_POSTED,"Job ""Validator Test Module — VT-Job-1777716003035"" has been posted successfully.",false,2026-05-02
-NTF031,U010,JOB_POSTED,"Job ""Validator Test Module — BellColor-1777716398416"" has been posted successfully.",false,2026-05-02
-NTF032,U010,JOB_POSTED,"Job ""Validator Test Module — ColorTest-1777716398715"" has been posted successfully.",false,2026-05-02
-NTF033,U010,JOB_POSTED,"Job ""Validator Test Module — VT-Job-1777716398856"" has been posted successfully.",false,2026-05-02
+NTF001,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CV"" (TEST01).",true,2026-05-09
+NTF002,U003,APPLICATION_SUBMITTED,"Your application for ""TA-CS"" (CS301) has been submitted successfully.",true,2026-05-09
+NTF003,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CS"" (CS301).",true,2026-05-09
+NTF004,U003,APPLICATION_SUBMITTED,"Your application for ""TA-AM"" (EBU001) has been submitted successfully.",true,2026-05-09
+NTF005,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-AM"" (EBU001).",true,2026-05-09
+NTF006,U003,STATUS_UPDATED,"Your application for ""TA-CV"" (TEST01) has been updated to: ACCEPTED.",true,2026-05-09
+NTF007,U003,STATUS_UPDATED,"Your application for ""TA-CS"" (CS301) has been updated to: ACCEPTED.",true,2026-05-09
+NTF008,U003,STATUS_UPDATED,"Your application for ""TA-AM"" (EBU001) has been updated to: REJECTED.",true,2026-05-09
+NTF009,U003,APPLICATION_SUBMITTED,"Your application for ""111"" (111) has been submitted successfully.",true,2026-05-09
+NTF010,U004,APPLICATION_SUBMITTED,"A new application has been received for ""111"" (111).",true,2026-05-09
+NTF011,U003,STATUS_UPDATED,"Your application for ""111"" (111) has been updated to: ACCEPTED.",true,2026-05-09
+NTF012,U003,APPLICATION_SUBMITTED,"Your application for ""2"" (222) has been submitted successfully.",false,2026-05-09
+NTF013,U004,APPLICATION_SUBMITTED,"A new application has been received for ""2"" (222).",false,2026-05-09
+NTF014,U003,STATUS_UPDATED,"Your application for ""2"" (222) has been updated to: ACCEPTED.",false,2026-05-09
+NTF015,U005,APPLICATION_SUBMITTED,"Your application for ""TA-CV"" (TEST01) has been submitted successfully.",false,2026-05-09
+NTF016,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CV"" (TEST01).",false,2026-05-09
+NTF017,U005,APPLICATION_SUBMITTED,"Your application for ""TA-CS"" (CS301) has been submitted successfully.",false,2026-05-09
+NTF018,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CS"" (CS301).",false,2026-05-09
+NTF019,U005,APPLICATION_SUBMITTED,"Your application for ""TA-AM"" (EBU001) has been submitted successfully.",false,2026-05-09
+NTF020,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-AM"" (EBU001).",false,2026-05-09
+NTF021,U005,APPLICATION_SUBMITTED,"Your application for ""111"" (111) has been submitted successfully.",false,2026-05-09
+NTF022,U004,APPLICATION_SUBMITTED,"A new application has been received for ""111"" (111).",false,2026-05-09
+NTF023,U005,APPLICATION_SUBMITTED,"Your application for ""2"" (222) has been submitted successfully.",false,2026-05-09
+NTF024,U004,APPLICATION_SUBMITTED,"A new application has been received for ""2"" (222).",false,2026-05-09
+NTF025,U005,STATUS_UPDATED,"Your application for ""TA-CV"" (TEST01) has been updated to: ACCEPTED.",false,2026-05-09

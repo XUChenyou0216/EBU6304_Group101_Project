@@ -32,16 +32,22 @@ public class TAProfileDAO {
     }
 
     public void saveOrUpdate(TAProfile profile) {
-        if (findByUserId(profile.getUserId()) != null) {
-            List<String> rows = FileManager.readAll(filePath);
+        FileManager.updateRows(filePath, TAProfile.CSV_HEADER, rows -> {
             List<String> newRows = new ArrayList<>();
+            boolean updated = false;
             for (String row : rows) {
                 TAProfile p = TAProfile.fromCsvRow(row);
-                if (p != null && p.getUserId().equals(profile.getUserId()))
+                if (p != null && p.getUserId().equals(profile.getUserId())) {
                     newRows.add(profile.toCsvRow());
-                else newRows.add(row);
+                    updated = true;
+                } else {
+                    newRows.add(row);
+                }
             }
-            FileManager.writeAll(filePath, TAProfile.CSV_HEADER, newRows);
-        } else { save(profile); }
+            if (!updated) {
+                newRows.add(profile.toCsvRow());
+            }
+            return newRows;
+        });
     }
 }

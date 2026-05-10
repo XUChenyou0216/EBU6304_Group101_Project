@@ -12,3 +12,4 @@ target/
 Thumbs.db
 src/main/webapp/uploads/*.pdf
 src/main/webapp/uploads/*.docx
+src/main/webapp/data/config.properties

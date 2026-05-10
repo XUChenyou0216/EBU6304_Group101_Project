@@ -1,5 +1,3 @@
 userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath
-U003,1233322,student_li,IST,Year 4,null,uploads/U003_1777712929750.docx
-U011,null,null,null,null,null,uploads/U011_1777718752583.docx
-U012,null,null,null,null,null,uploads/U012_1777718948870.docx
-U013,null,null,null,null,null,uploads/U013_1777718967642.docx
+U003,123456,Lili,IST,Year 2,null,uploads/U003_1776941155546.docx
+U005,2024123456,Zhaotic,IST,Year 2,null,
