@@ -77,21 +77,18 @@ public class ApplyServlet extends HttpServlet {
 
         ApplicationDAO appDAO = new ApplicationDAO(dataDir);
 
-        // No duplicate applications
-        if (appDAO.hasApplied(currentUser.getUserId(), jobId)) {
-            resp.sendRedirect(req.getContextPath() + "/ta/jobs.jsp?error=duplicate");
-            return;
-        }
-
         Application app = new Application(
-                appDAO.generateNextId(),
+                "",
                 currentUser.getUserId(),
                 jobId,
                 "SUBMITTED",
                 LocalDate.now().toString(),
                 ""
         );
-        appDAO.save(app);
+        if (!appDAO.saveIfNotApplied(app)) {
+            resp.sendRedirect(req.getContextPath() + "/ta/jobs.jsp?error=duplicate");
+            return;
+        }
 
         // Notify TA: application submitted
         String today = LocalDate.now().toString();

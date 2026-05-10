@@ -96,8 +96,8 @@ public class FullIterationFeatureTest {
 
         assertNotNull("Short password should return error",
                 Validator.validatePassword("123"));
-        assertNull("Password with at least 6 characters should pass",
-                Validator.validatePassword("123456"));
+        assertNull("Strong password should pass",
+                Validator.validatePassword("Abc123"));
 
         assertNotNull("Invalid phone number should return error",
                 Validator.validatePhone("abc123"));

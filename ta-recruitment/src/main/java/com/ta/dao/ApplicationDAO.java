@@ -103,16 +103,46 @@ public class ApplicationDAO {
         FileManager.appendRow(filePath, Application.CSV_HEADER, app.toCsvRow());
     }
 
-    public void update(Application updated) {
-        List<String> rows = FileManager.readAll(filePath);
-        List<String> newRows = new ArrayList<>();
-        for (String row : rows) {
-            Application a = Application.fromCsvRow(row);
-            if (a != null && a.getApplicationId().equals(updated.getApplicationId()))
-                newRows.add(updated.toCsvRow());
-            else newRows.add(row);
+    public String saveWithNextId(Application app) {
+        String generatedId = FileManager.appendWithGeneratedId(filePath, Application.CSV_HEADER, "APP", id -> {
+            app.setApplicationId(id);
+            return app.toCsvRow();
+        });
+        if (generatedId != null) {
+            app.setApplicationId(generatedId);
         }
-        FileManager.writeAll(filePath, Application.CSV_HEADER, newRows);
+        return generatedId;
+    }
+
+    public boolean saveIfNotApplied(Application app) {
+        return FileManager.appendIfAbsent(
+                filePath,
+                Application.CSV_HEADER,
+                row -> {
+                    Application existing = Application.fromCsvRow(row);
+                    return existing != null
+                            && existing.getTaUserId().equals(app.getTaUserId())
+                            && existing.getJobId().equals(app.getJobId());
+                },
+                rows -> {
+                    String id = FileManager.nextId(rows, "APP");
+                    app.setApplicationId(id);
+                    return app.toCsvRow();
+                }
+        );
+    }
+
+    public void update(Application updated) {
+        FileManager.updateRows(filePath, Application.CSV_HEADER, rows -> {
+            List<String> newRows = new ArrayList<>();
+            for (String row : rows) {
+                Application a = Application.fromCsvRow(row);
+                if (a != null && a.getApplicationId().equals(updated.getApplicationId()))
+                    newRows.add(updated.toCsvRow());
+                else newRows.add(row);
+            }
+            return newRows;
+        });
     }
 
     /** Replace the entire applications file in one write (same row order as {@code applications}). */

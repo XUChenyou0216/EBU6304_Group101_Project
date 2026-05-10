@@ -34,6 +34,15 @@
         <url-pattern>/mo/applicants</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>MoProgressServlet</servlet-name>
+        <servlet-class>com.ta.servlet.MoProgressServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MoProgressServlet</servlet-name>
+        <url-pattern>/mo/progress</url-pattern>
+    </servlet-mapping>
+
     <!-- Explicit mappings: tomcat7:run may not pick up @WebServlet reliably -->
     <servlet>
         <servlet-name>MoReopenJobServlet</servlet-name>
