@@ -123,7 +123,7 @@ public class AIWorkloadServlet extends HttpServlet {
         List<AdminWorkloadServlet.TaWorkloadRow> overloadedRows = new ArrayList<>();
         for (User ta : allTas) {
             int hrs = taHours.get(ta.getUserId());
-            if (hrs < AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) continue;
+            if (hrs <= AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) continue;
             TAProfile p = profileDAO.findByUserId(ta.getUserId());
             Set<String> labels = new LinkedHashSet<>();
             for (Application a : taApps.get(ta.getUserId())) {
@@ -314,12 +314,12 @@ public class AIWorkloadServlet extends HttpServlet {
         List<User> allTas = new ArrayList<>(sortedTas);
 
         for (User fromTa : sortedTas) {
-            if (taHours.get(fromTa.getUserId()) < AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) break;
+            if (taHours.get(fromTa.getUserId()) <= AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) break;
             TAProfile fromP = profileDAO.findByUserId(fromTa.getUserId());
             String fromName = displayName(fromP, fromTa);
 
             for (Application app : taApps.get(fromTa.getUserId())) {
-                if (taHours.get(fromTa.getUserId()) < AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) break;
+                if (taHours.get(fromTa.getUserId()) <= AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) break;
 
                 User toTa = findCandidate(allTas, taHours, taApps, fromTa.getUserId(), app.getJobId());
                 if (toTa == null) continue;
