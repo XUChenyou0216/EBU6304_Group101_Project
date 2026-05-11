@@ -1,9 +1,20 @@
 package com.ta.model;
 
 public class Notification {
+
+    // ── Notification type constants ──────────────────────────────────────
+    /** TA submitted an application (recipient: MO). */
+    public static final String TYPE_APPLICATION_SUBMITTED = "APPLICATION_SUBMITTED";
+    /** Application status changed (recipient: TA). */
+    public static final String TYPE_STATUS_UPDATED        = "STATUS_UPDATED";
+    /** MO posted a new job successfully (recipient: MO). */
+    public static final String TYPE_JOB_POSTED            = "JOB_POSTED";
+    /** A TA's estimated workload exceeds the limit (recipient: ADMIN). */
+    public static final String TYPE_WORKLOAD_ALERT        = "WORKLOAD_ALERT";
+
     private String notificationId;
     private String userId;
-    private String type;        // "APPLICATION_SUBMITTED", "STATUS_UPDATED"
+    private String type;
     private String message;
     private boolean isRead;
     private String createdDate;
@@ -43,6 +54,27 @@ public class Notification {
 
     public static final String CSV_HEADER =
         "notificationId,userId,type,message,isRead,createdDate";
+
+    /**
+     * Returns a Bootstrap color context string based on the notification type.
+     * <ul>
+     *   <li>{@code JOB_POSTED}      → "success"  (green)</li>
+     *   <li>{@code WORKLOAD_ALERT}  → "danger"   (red)</li>
+     *   <li>{@code STATUS_UPDATED}  → "info"     (cyan)</li>
+     *   <li>{@code APPLICATION_SUBMITTED} → "primary" (blue)</li>
+     *   <li>others                  → "secondary" (grey)</li>
+     * </ul>
+     */
+    public String getColor() {
+        if (type == null) return "secondary";
+        switch (type) {
+            case TYPE_JOB_POSTED:            return "success";
+            case TYPE_WORKLOAD_ALERT:        return "danger";
+            case TYPE_STATUS_UPDATED:        return "info";
+            case TYPE_APPLICATION_SUBMITTED: return "primary";
+            default:                         return "secondary";
+        }
+    }
 
     public static Notification fromCsvRow(String row) {
         String[] f = Job.parseCsv(row);

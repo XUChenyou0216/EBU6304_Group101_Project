@@ -3,7 +3,9 @@ package com.ta.servlet;
 import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
 import com.ta.model.Application;
+import com.ta.dao.NotificationDAO;
 import com.ta.model.Job;
+import com.ta.model.Notification;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
 import com.ta.util.Validator;
@@ -66,6 +68,7 @@ public class PostJobServlet extends HttpServlet {
         ApplicationDAO applicationDAO = new ApplicationDAO(dataDir);
 
         if (jobId != null && !jobId.trim().isEmpty()) {
+            // Edit existing job
             Job job = jobDAO.findById(jobId);
             if (job == null || !job.getMoUserId().equals(currentUser.getUserId())) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Not authorized to edit this job.");
@@ -113,7 +116,7 @@ public class PostJobServlet extends HttpServlet {
         } else {
             // Create new job
             Job newJob = new Job(
-                    "",
+                    jobDAO.generateNextId(),
                     currentUser.getUserId(),
                     moduleCode,
                     moduleName,
@@ -128,7 +131,20 @@ public class PostJobServlet extends HttpServlet {
                     "OPEN",
                     LocalDate.now().toString()
             );
-            jobDAO.saveWithNextId(newJob);
+            jobDAO.save(newJob);
+
+            // Notify the MO that the job was posted successfully
+            NotificationDAO notifDao = new NotificationDAO(dataDir);
+            Notification notif = new Notification(
+                    notifDao.generateNextId(),
+                    currentUser.getUserId(),
+                    Notification.TYPE_JOB_POSTED,
+                    "Job \"" + moduleName + " — " + jobTitle + "\" has been posted successfully.",
+                    false,
+                    LocalDate.now().toString()
+            );
+            notifDao.save(notif);
+
             response.sendRedirect(request.getContextPath() + "/mo/jobs.jsp?success=posted");
         }
     }

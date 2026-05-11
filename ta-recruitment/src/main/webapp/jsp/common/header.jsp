@@ -147,7 +147,7 @@
                         <% if (userNotifications == null || userNotifications.isEmpty()) { %>
                         <div class="notif-empty">No notifications yet.</div>
                         <% } else { for (Notification n : userNotifications) { %>
-                        <div class="notif-item <%= n.isRead() ? "" : "notif-unread" %>" id="ni-<%= n.getNotificationId() %>">
+                        <div class="notif-item notif-item--<%= n.getColor() %> <%= n.isRead() ? "" : "notif-unread" %>" id="ni-<%= n.getNotificationId() %>">
                             <div class="notif-item-msg"><%= n.getMessage() != null ? n.getMessage().replace("&","&amp;").replace("<","&lt;").replace(">","&gt;") : "" %></div>
                             <div class="notif-item-meta">
                                 <span class="notif-date"><%= n.getCreatedDate() %></span>
@@ -204,7 +204,18 @@
         transition: background 0.1s;
     }
     .notif-item:last-child { border-bottom: none; }
-    .notif-unread { background: #f0f4ff; }
+    /* Per-type left border (always visible, read or unread) */
+    .notif-item--success  { border-left: 3px solid #22c55e; }
+    .notif-item--danger   { border-left: 3px solid #ef4444; }
+    .notif-item--info     { border-left: 3px solid #06b6d4; }
+    .notif-item--primary  { border-left: 3px solid #6366f1; }
+    .notif-item--secondary{ border-left: 3px solid #94a3b8; }
+    /* Per-type unread background */
+    .notif-unread.notif-item--success  { background: #f0fdf4; }
+    .notif-unread.notif-item--danger   { background: #fef2f2; }
+    .notif-unread.notif-item--info     { background: #ecfeff; }
+    .notif-unread.notif-item--primary  { background: #f0f4ff; }
+    .notif-unread.notif-item--secondary{ background: #f8fafc; }
     .notif-item-msg { font-size: 13px; color: #334155; line-height: 1.45; margin-bottom: 4px; }
     .notif-item-meta { display: flex; align-items: center; justify-content: space-between; }
     .notif-date { font-size: 11px; color: #94a3b8; }
