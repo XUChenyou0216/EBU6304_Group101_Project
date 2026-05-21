@@ -189,7 +189,7 @@
                 <div class="account-avatar <%= avClass %>"><%= uInitials %></div>
                 <div>
                     <div class="account-name"><%= u.getUsername() %></div>
-                    <div class="account-detail"><%= roleLabel %> &mdash; <%= u.getEmail() %></div>
+                    <div class="account-detail"><%= userRoleLabel %> &mdash; <%= u.getEmail() %></div>
                 </div>
             </div>
             <div class="account-actions">

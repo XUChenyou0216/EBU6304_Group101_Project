@@ -61,18 +61,12 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.12.0</version>
                 <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>src/main/webapp/data</directory>
-                            <targetPath>data</targetPath>
-                            <includes>
-                                <include>**/*.csv</include>
-                            </includes>
-                        </resource>
-                    </webResources>
+                    <failOnError>false</failOnError>
+                    <failOnWarnings>false</failOnWarnings>
+                    <doclint>none</doclint>
                 </configuration>
             </plugin>
             <plugin>

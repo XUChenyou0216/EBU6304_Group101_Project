@@ -39,14 +39,12 @@ public class RegisterServlet extends HttpServlet {
         }
 
         UserDAO dao = new UserDAO(SessionUtil.getDataDir(req));
-        if (dao.findByUsername(username.trim()) != null) {
+        User newUser = new User("", username.trim(),
+            PasswordUtil.hash(password), role.toUpperCase(), email.trim(), sq, sa, "ACTIVE");
+        if (!dao.saveIfUsernameAvailable(newUser)) {
             req.setAttribute("error", "Username already exists.");
             req.getRequestDispatcher("/register.jsp").forward(req, resp); return;
         }
-
-        User newUser = new User(dao.generateNextId(), username.trim(),
-            PasswordUtil.hash(password), role.toUpperCase(), email.trim(), sq, sa, "ACTIVE");
-        dao.save(newUser);
 
         resp.sendRedirect(req.getContextPath() + "/login?registered=true");
     }

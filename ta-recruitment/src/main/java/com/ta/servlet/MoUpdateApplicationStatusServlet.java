@@ -3,6 +3,7 @@ package com.ta.servlet;
 import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
 import com.ta.dao.NotificationDAO;
+import com.ta.dao.UserDAO;
 import com.ta.model.Application;
 import com.ta.model.Job;
 import com.ta.model.Notification;
@@ -96,6 +97,40 @@ public class MoUpdateApplicationStatusServlet extends HttpServlet {
         NotificationDAO notifDAO = new NotificationDAO(dataDir);
         notifDAO.save(new Notification(notifDAO.generateNextId(), app.getTaUserId(),
             "STATUS_UPDATED", taMsg, false, LocalDate.now().toString()));
+
+        // If this acceptance pushes the TA over the workload limit, alert all admins
+        if ("ACCEPTED".equals(normalized)) {
+            long acceptedCount = appDao.findByTa(app.getTaUserId()).stream()
+                    .filter(a -> "ACCEPTED".equals(a.getStatus()))
+                    .count();
+            int estimatedHours = (int) (acceptedCount
+                    * AdminWorkloadServlet.HOURS_PER_ACCEPTED_ASSIGNMENT);
+            if (estimatedHours > AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) {
+                UserDAO userDAO = new UserDAO(dataDir);
+                User ta = userDAO.findById(app.getTaUserId());
+                String taName = (ta != null) ? ta.getUsername() : app.getTaUserId();
+                String taMarker = "[TA:" + app.getTaUserId() + "]";
+                for (User admin : userDAO.findAll()) {
+                    if (!"ADMIN".equalsIgnoreCase(admin.getRole())) continue;
+                    // Dedup: skip if an unread alert for this TA already exists
+                    boolean alreadyPending = notifDAO.findByUser(admin.getUserId()).stream()
+                            .anyMatch(n -> Notification.TYPE_WORKLOAD_ALERT.equals(n.getType())
+                                    && !n.isRead()
+                                    && n.getMessage().contains(taMarker));
+                    if (alreadyPending) continue;
+                    notifDAO.save(new Notification(
+                            notifDAO.generateNextId(),
+                            admin.getUserId(),
+                            Notification.TYPE_WORKLOAD_ALERT,
+                            "Workload alert " + taMarker + ": " + taName
+                                    + " has " + estimatedHours + "h"
+                                    + " (limit " + AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS + "h).",
+                            false,
+                            LocalDate.now().toString()
+                    ));
+                }
+            }
+        }
 
         if ("progress".equals(returnTo)) {
             resp.sendRedirect(req.getContextPath() + "/mo/progress.jsp?success=updated");

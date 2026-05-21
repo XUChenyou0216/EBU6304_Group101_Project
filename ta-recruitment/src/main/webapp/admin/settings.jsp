@@ -94,7 +94,7 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">University Name</div>
-                    <input type="text" class="setting-input" value="BUPT International School">
+                    <input type="text" class="setting-input" value="Queen Mary University of London">
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">Academic Year</div>
@@ -108,11 +108,11 @@
                     <div style="display:flex;gap:12px;">
                         <div>
                             <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Start Date</div>
-                            <input type="date" class="setting-input" value="2026-01-15">
+                            <input type="date" class="setting-input" value="2026-03-01">
                         </div>
                         <div>
                             <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">End Date</div>
-                            <input type="date" class="setting-input" value="2026-04-30">
+                            <input type="date" class="setting-input" value="2026-06-30">
                         </div>
                     </div>
                 </div>
