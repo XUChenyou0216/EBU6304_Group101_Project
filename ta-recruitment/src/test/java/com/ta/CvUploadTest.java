@@ -39,6 +39,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static org.junit.Assert.*;
 
 /**
+
  * Integration and unit tests for user story <strong>US-T02: CV Upload Security Validation</strong>.
  *
  * <p>As a tester, these tests verify that the system correctly blocks unsupported file types
@@ -88,6 +89,21 @@ import static org.junit.Assert.*;
  *
  * @see Validator
  * @see TAProfileDAO
+
+ * US-T02: CV Upload Security Validation (Should)
+ *
+ * As a Tester, I want to verify the system correctly blocks unsupported file
+ * types or oversized files when a TA uploads a CV, so that the application
+ * doesn't crash or store malicious files.
+ *
+ * Acceptance Criteria:
+ *   AC-1  Executable files (.exe, .sh) and files larger than 10 MB are rejected.
+ *   AC-2  A clear error message is returned for invalid uploads.
+ *   AC-3  Only standard document formats (.pdf, .doc, .docx) are saved to the
+ *         local uploads directory; rejected files never reach the file system.
+ *
+ * Run with: mvn -Dtest=CvUploadTest test
+
  */
 public class CvUploadTest {
 
@@ -95,11 +111,19 @@ public class CvUploadTest {
     private static final long MB       = 1024L * KB;
     private static final long MAX_SIZE = 10L * MB;
 
+
     // ── JUnit 4 TemporaryFolder (Sections 1–3 file-system tests) ────────────
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
     // ── Embedded Tomcat (Sections 4–5 servlet/UI tests) ───────────────────────
+
+    // ── JUnit 4 TemporaryFolder（Section 1-3 文件系统测试用）────────────────
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    // ── 嵌入式 Tomcat（Section 4-5 Servlet/UI 测试用）────────────────────────
+
     private static Tomcat   tomcat;
     private static String   baseUrl;
     private static File     webappRoot;
@@ -108,6 +132,7 @@ public class CvUploadTest {
     private static final long   RUN_ID      = System.currentTimeMillis();
     private static final String TA_USER     = "cvtest_ta_" + RUN_ID;
     private static final String TA_PASSWORD = "Pass1234";
+
 
     /**
      * Starts an embedded Tomcat server before any test in this class runs.
@@ -121,6 +146,7 @@ public class CvUploadTest {
      *
      * @throws Exception if the webapp copy, Tomcat startup, or TA registration fails
      */
+
     @BeforeClass
     public static void startServer() throws Exception {
         prepareWebappCopy();
@@ -138,6 +164,7 @@ public class CvUploadTest {
         registerTA(TA_USER, TA_USER + "@test.com", TA_PASSWORD);
     }
 
+
     /**
      * Stops and destroys the embedded Tomcat server after all tests in this class complete.
      *
@@ -146,10 +173,12 @@ public class CvUploadTest {
      *
      * @throws Exception if Tomcat shutdown fails
      */
+
     @AfterClass
     public static void stopServer() throws Exception {
         if (tomcat != null) { tomcat.stop(); tomcat.destroy(); }
     }
+
 
     /**
      * Creates a fresh HtmlUnit {@link WebClient} before each test method.
@@ -158,6 +187,7 @@ public class CvUploadTest {
      * so that UI assertions focus on content rather than styling engine noise. Redirect
      * following is enabled so that post-upload navigation can be inspected via the final URL.</p>
      */
+
     @Before
     public void openBrowser() {
         webClient = new WebClient(BrowserVersion.CHROME);
@@ -168,18 +198,21 @@ public class CvUploadTest {
         webClient.getOptions().setRedirectEnabled(true);
     }
 
+
     /**
      * Closes the HtmlUnit {@link WebClient} after each test method to release resources.
      *
      * <p>Prevents connection leaks between test methods by shutting down the browser
      * instance created in {@link #openBrowser()}.</p>
      */
+
     @After
     public void closeBrowser() {
         if (webClient != null) webClient.close();
     }
 
     // ── AC-1: Blocked file types ──────────────────────────────────────────
+
 
     /**
      * Verifies that a Windows executable ({@code .exe}) is rejected by
@@ -188,11 +221,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: executable file types must not be accepted as CV uploads,
      * regardless of file size.</p>
      */
+
     @Test
     public void executableFile_exe_isRejected() {
         String error = Validator.validateCvFile("malware.exe", MB);
         assertNotNull("EXE file must be rejected by the validator", error);
     }
+
 
     /**
      * Verifies that a Unix shell script ({@code .sh}) is rejected by
@@ -201,11 +236,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: script files that could execute arbitrary commands
      * must be blocked at validation time.</p>
      */
+
     @Test
     public void executableFile_sh_isRejected() {
         String error = Validator.validateCvFile("deploy.sh", MB);
         assertNotNull("Shell script (.sh) must be rejected by the validator", error);
     }
+
 
     /**
      * Verifies that a Windows batch script ({@code .bat}) is rejected by
@@ -214,11 +251,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: Windows batch files are treated as executable content
      * and must be rejected.</p>
      */
+
     @Test
     public void executableFile_bat_isRejected() {
         String error = Validator.validateCvFile("run.bat", MB);
         assertNotNull("Batch script (.bat) must be rejected", error);
     }
+
 
     /**
      * Verifies that a ZIP archive ({@code .zip}) is rejected by
@@ -227,11 +266,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: compressed archives are not among the allowed document
      * formats and must be rejected.</p>
      */
+
     @Test
     public void compressedFile_zip_isRejected() {
         String error = Validator.validateCvFile("archive.zip", MB);
         assertNotNull("ZIP archive must be rejected", error);
     }
+
 
     /**
      * Verifies that a JavaScript file ({@code .js}) is rejected by
@@ -240,11 +281,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: client-side script files must not be accepted as CV
      * uploads.</p>
      */
+
     @Test
     public void scriptFile_js_isRejected() {
         String error = Validator.validateCvFile("script.js", MB);
         assertNotNull("JavaScript file must be rejected", error);
     }
+
 
     /**
      * Verifies that a PDF file whose size exceeds the 10&nbsp;MB limit is rejected by
@@ -253,12 +296,14 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: even a valid extension cannot bypass the maximum
      * file size constraint.</p>
      */
+
     @Test
     public void fileExceedingTenMb_isRejected() {
         // MAX_SIZE + 1 byte exceeds the limit
         String error = Validator.validateCvFile("cv.pdf", MAX_SIZE + 1);
         assertNotNull("A file larger than 10 MB must be rejected", error);
     }
+
 
     /**
      * Verifies that an oversized executable is rejected even when both format and size
@@ -267,6 +312,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong>: a file that violates both the extension whitelist
      * and the size limit must still produce a validation error.</p>
      */
+
     @Test
     public void largeExecutable_isRejectedForBothReasons() {
         // Even if the file were somehow labelled valid, size alone also fails
@@ -276,6 +322,7 @@ public class CvUploadTest {
 
     // ── AC-1 boundary: size edge cases ────────────────────────────────────
 
+
     /**
      * Verifies that a PDF file whose size equals exactly 10&nbsp;MB (the configured limit)
      * passes validation.
@@ -283,6 +330,7 @@ public class CvUploadTest {
      * <p>Covers the inclusive upper boundary of <strong>AC-1</strong>: a file at exactly
      * {@code MAX_SIZE} bytes must be accepted because the check uses strict greater-than.</p>
      */
+
     @Test
     public void fileSizeAtExactLimit_isAccepted() {
         // fileSize == 10 * 1024 * 1024 is NOT greater-than, so it must pass
@@ -290,17 +338,20 @@ public class CvUploadTest {
         assertNull("A PDF file of exactly 10 MB should be accepted", error);
     }
 
+
     /**
      * Verifies that a DOCX file one byte below the 10&nbsp;MB limit passes validation.
      *
      * <p>Covers a near-limit boundary case just below {@code MAX_SIZE} to confirm that
      * files slightly under the cap are accepted.</p>
      */
+
     @Test
     public void fileSizeOneByteBelowLimit_isAccepted() {
         String error = Validator.validateCvFile("cv.docx", MAX_SIZE - 1);
         assertNull("A DOCX file one byte below 10 MB should be accepted", error);
     }
+
 
     /**
      * Verifies that a PDF file one byte above the 10&nbsp;MB limit is rejected.
@@ -308,6 +359,7 @@ public class CvUploadTest {
      * <p>Covers the exclusive upper boundary of <strong>AC-1</strong>: a file of
      * {@code MAX_SIZE + 1} bytes must fail validation.</p>
      */
+
     @Test
     public void fileSizeOneBytAboveLimit_isRejected() {
         String error = Validator.validateCvFile("cv.pdf", MAX_SIZE + 1);
@@ -316,6 +368,7 @@ public class CvUploadTest {
 
     // ── AC-2: Clear error messages ────────────────────────────────────────
 
+
     /**
      * Verifies that the error message for an invalid file format mentions PDF as an
      * allowed type.
@@ -323,6 +376,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: users must receive guidance listing PDF as a
      * supported format when they upload a disallowed file type.</p>
      */
+
     @Test
     public void invalidFormat_errorMessageMentionsPdf() {
         String error = Validator.validateCvFile("resume.exe", MB);
@@ -333,6 +387,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that the error message for an invalid file format mentions DOC or DOCX as
      * allowed types.
@@ -340,6 +395,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: the error text must inform users that Word document
      * formats are permitted.</p>
      */
+
     @Test
     public void invalidFormat_errorMessageMentionsDoc() {
         String error = Validator.validateCvFile("resume.sh", MB);
@@ -350,6 +406,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that the error message for an invalid file format begins with
      * {@code "Invalid file format"}.
@@ -357,6 +414,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: the primary error prefix must clearly identify
      * the failure as a format problem rather than a size or server error.</p>
      */
+
     @Test
     public void invalidFormat_errorMessageContainsInvalidFileFormat() {
         String error = Validator.validateCvFile("payload.exe", MB);
@@ -367,6 +425,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that the error message for an oversized file references the size limit
      * (e.g. {@code "10"}, {@code "limit"}, or {@code "exceed"}).
@@ -374,6 +433,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: users uploading files that exceed 10&nbsp;MB must
      * receive a message that explains the size restriction.</p>
      */
+
     @Test
     public void oversizedFile_errorMessageMentionsSizeLimit() {
         String error = Validator.validateCvFile("cv.pdf", MAX_SIZE + 1);
@@ -385,6 +445,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that a {@code null} filename produces a non-null validation error
      * (prompting the user to select a file).
@@ -392,11 +453,13 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: missing file selection must yield a user-facing
      * error rather than a silent pass or uncaught failure.</p>
      */
+
     @Test
     public void nullFileName_returnsSelectFileError() {
         String error = Validator.validateCvFile(null, MB);
         assertNotNull("Null filename must return a non-null error", error);
     }
+
 
     /**
      * Verifies that an empty filename produces a non-null validation error.
@@ -404,6 +467,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-2</strong>: an empty string filename is treated as no file
      * selected and must return an error message.</p>
      */
+
     @Test
     public void emptyFileName_returnsSelectFileError() {
         String error = Validator.validateCvFile("", MB);
@@ -412,12 +476,14 @@ public class CvUploadTest {
 
     // ── AC-3: Valid formats pass validation ───────────────────────────────
 
+
     /**
      * Verifies that a PDF file within the size limit passes validation.
      *
      * <p>Covers <strong>AC-3</strong>: {@code .pdf} is an allowed document format when
      * the file size is within the 10&nbsp;MB cap.</p>
      */
+
     @Test
     public void validPdfFile_passesValidation() {
         assertNull(
@@ -426,12 +492,14 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that a DOCX file within the size limit passes validation.
      *
      * <p>Covers <strong>AC-3</strong>: {@code .docx} is an allowed document format when
      * the file size is within the 10&nbsp;MB cap.</p>
      */
+
     @Test
     public void validDocxFile_passesValidation() {
         assertNull(
@@ -440,12 +508,14 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that a DOC file within the size limit passes validation.
      *
      * <p>Covers <strong>AC-3</strong>: legacy {@code .doc} Word files are permitted when
      * within the size limit.</p>
      */
+
     @Test
     public void validDocFile_passesValidation() {
         assertNull(
@@ -454,12 +524,14 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that the PDF extension check is case-insensitive (e.g. {@code CV.PDF}).
      *
      * <p>Covers <strong>AC-3</strong>: uppercase extensions must be normalised and accepted
      * because {@link Validator} lowercases the filename internally.</p>
      */
+
     @Test
     public void pdfExtension_isCaseInsensitive() {
         // Validator lowercases the name internally, so CV.PDF must also pass
@@ -469,12 +541,14 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Verifies that the DOCX extension check is case-insensitive (e.g. {@code Resume.DOCX}).
      *
      * <p>Covers <strong>AC-3</strong>: mixed-case DOCX filenames from different operating
      * systems must pass validation.</p>
      */
+
     @Test
     public void docxExtension_isCaseInsensitive() {
         assertNull(
@@ -485,6 +559,7 @@ public class CvUploadTest {
 
     // ── AC-3: Reject silently — file is never written to disk ─────────────
 
+
     /**
      * Simulates the upload guard: an executable must be rejected before any bytes are written
      * to the uploads directory.
@@ -494,6 +569,7 @@ public class CvUploadTest {
      *
      * @throws Exception if temporary folder creation or file I/O fails unexpectedly
      */
+
     @Test
     public void executableFile_isNeverWrittenToUploadsDir() throws Exception {
         File uploadsDir = folder.newFolder("uploads");
@@ -514,6 +590,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Simulates the upload guard: a shell script must be rejected before any bytes are
      * written to the uploads directory.
@@ -523,6 +600,7 @@ public class CvUploadTest {
      *
      * @throws Exception if temporary folder creation or file I/O fails unexpectedly
      */
+
     @Test
     public void shellScript_isNeverWrittenToUploadsDir() throws Exception {
         File uploadsDir = folder.newFolder("uploads");
@@ -543,6 +621,7 @@ public class CvUploadTest {
 
     // ── AC-3: Valid documents are saved and recorded in profiles.csv ──────
 
+
     /**
      * Verifies end-to-end persistence for a valid PDF: the file is written to disk and the
      * TA profile record stores a {@code .pdf} CV path.
@@ -553,6 +632,7 @@ public class CvUploadTest {
      *
      * @throws Exception if temporary folder creation, file I/O, or DAO operations fail
      */
+
     @Test
     public void validPdfFile_isSavedAndProfileRecorded() throws Exception {
         File uploadsDir = folder.newFolder("uploads");
@@ -584,6 +664,7 @@ public class CvUploadTest {
                 saved.getCvFilePath().endsWith(".pdf"));
     }
 
+
     /**
      * Verifies end-to-end persistence for a valid DOCX: the file is written to disk and the
      * TA profile record stores a {@code .docx} CV path.
@@ -593,6 +674,7 @@ public class CvUploadTest {
      *
      * @throws Exception if temporary folder creation, file I/O, or DAO operations fail
      */
+
     @Test
     public void validDocxFile_isSavedAndProfileRecorded() throws Exception {
         File uploadsDir = folder.newFolder("uploads");
@@ -620,6 +702,7 @@ public class CvUploadTest {
                 saved.getCvFilePath().endsWith(".docx"));
     }
 
+
     /**
      * Verifies that a legitimately saved profile CV path never contains a dangerous extension
      * and ends with an allowed document suffix.
@@ -629,6 +712,7 @@ public class CvUploadTest {
      *
      * @throws Exception if temporary folder creation or DAO operations fail
      */
+
     @Test
     public void profileCvPath_neverContainsDangerousExtension() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -654,6 +738,7 @@ public class CvUploadTest {
 
     // ── Multi-case sweep ──────────────────────────────────────────────────
 
+
     /**
      * Parameterised sweep asserting that a broad set of dangerous or disallowed extensions
      * are all rejected by {@link Validator#validateCvFile(String, long)}.
@@ -661,6 +746,7 @@ public class CvUploadTest {
      * <p>Covers <strong>AC-1</strong> across many common executable, script, archive, and
      * non-document extensions in a single loop to guard against whitelist gaps.</p>
      */
+
     @Test
     public void allCommonDangerousExtensions_areRejected() {
         String[] dangerous = {"exe", "sh", "bat", "cmd", "msi", "vbs",
@@ -675,6 +761,7 @@ public class CvUploadTest {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+
     // Section 4 — HTTP servlet layer: real file upload → redirect URL verification
     //   Embedded Tomcat + HtmlUnit; exercises UploadCvServlet redirect behaviour
     // ═══════════════════════════════════════════════════════════════════════
@@ -689,6 +776,12 @@ public class CvUploadTest {
      *
      * @throws Exception if login, page navigation, or file upload simulation fails
      */
+
+    // Section 4 — HTTP Servlet 层：真实文件上传 → 重定向 URL 验证
+    //   使用嵌入式 Tomcat + HtmlUnit，测试 UploadCvServlet 的重定向逻辑
+    // ═══════════════════════════════════════════════════════════════════════
+
+
     @Test
     public void uploadExeFile_servletRedirectsToInvalidFormatError() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -710,6 +803,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Uploads a shell script through the profile page and asserts that the servlet redirects
      * to {@code ?error=invalid_format}.
@@ -720,6 +814,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login, page navigation, or file upload simulation fails
      */
+
     @Test
     public void uploadShFile_servletRedirectsToInvalidFormatError() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -739,6 +834,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Uploads a valid PDF (with magic bytes) through the profile page and asserts that the
      * servlet redirects to {@code ?uploadStatus=success}.
@@ -748,6 +844,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login, page navigation, or file upload simulation fails
      */
+
     @Test
     public void uploadPdfFile_servletRedirectsToUploadSuccess() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -769,6 +866,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Uploads a valid DOCX file through the profile page and asserts that the servlet
      * redirects to {@code ?uploadStatus=success}.
@@ -778,6 +876,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login, page navigation, or file upload simulation fails
      */
+
     @Test
     public void uploadDocxFile_servletRedirectsToUploadSuccess() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -797,6 +896,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Accesses the upload endpoint without authentication and asserts that the request is
      * redirected to the login page.
@@ -807,6 +907,7 @@ public class CvUploadTest {
      *
      * @throws Exception if page navigation fails
      */
+
     @Test
     public void uploadWithoutLogin_servletRedirectsToLoginPage() throws Exception {
         // 不登录直接访问上传端点，应重定向到 login
@@ -818,6 +919,7 @@ public class CvUploadTest {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+
     // Section 5 — UI layer: error/success message rendering on profile.jsp
     //   Loads profile.jsp with query parameters; verifies JSP banner content
     // ═══════════════════════════════════════════════════════════════════════
@@ -831,6 +933,12 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
+    // Section 5 — UI 层：错误/成功消息在页面上的展示验证
+    //   直接带参数访问 profile.jsp，验证 JSP 渲染出正确的提示文案
+    // ═══════════════════════════════════════════════════════════════════════
+
+
     @Test
     public void profilePage_invalidFormatParam_displaysErrorBanner() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -842,6 +950,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Loads {@code profile.jsp?error=invalid_format} and asserts that the error message
      * lists supported formats (PDF, DOC) and no longer mentions removed types (JPG, PNG).
@@ -851,6 +960,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_invalidFormatParam_mentionsSupportedFormats() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -862,6 +972,7 @@ public class CvUploadTest {
         assertFalse("错误消息不应再提及 PNG（已从允许格式中移除）", body.contains("PNG"));
     }
 
+
     /**
      * Loads {@code profile.jsp?error=too_large} and asserts that a size-limit error banner
      * is displayed on the page.
@@ -871,6 +982,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_tooLargeParam_displaysErrorBanner() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -882,6 +994,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Loads {@code profile.jsp?uploadStatus=success} and asserts that a success banner
      * is displayed on the page.
@@ -892,6 +1005,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_uploadSuccessParam_displaysSuccessBanner() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -903,6 +1017,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Loads {@code profile.jsp?error=invalid_format} and asserts that the error banner HTML
      * includes red styling markers or the {@code "Upload Failed"} label.
@@ -913,6 +1028,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_uploadFailed_bannerHasRedStyling() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -925,6 +1041,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Loads {@code profile.jsp?uploadStatus=success} and asserts that the success banner HTML
      * includes green styling markers or the {@code "Upload Successful"} label.
@@ -935,6 +1052,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_uploadSuccess_bannerHasGreenStyling() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -946,6 +1064,7 @@ public class CvUploadTest {
         );
     }
 
+
     /**
      * Loads {@code profile.jsp} without error query parameters and asserts that no
      * {@code "Upload Failed"} banner is shown.
@@ -955,6 +1074,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_noErrorParam_showsNoErrorBanner() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -963,6 +1083,7 @@ public class CvUploadTest {
         assertFalse("无错误参数时，不应显示 Upload Failed 横幅",
                 body.contains("Upload Failed"));
     }
+
 
     /**
      * Loads the profile page and asserts that the upload hint text lists only allowed
@@ -973,6 +1094,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_formatHint_onlyMentionsAllowedFormats() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -985,6 +1107,7 @@ public class CvUploadTest {
         assertFalse("提示文字不应再列出 PNG", body.contains("PNG"));
     }
 
+
     /**
      * Loads the profile page and asserts that the file input {@code accept} attribute
      * permits {@code .pdf} and {@code .docx} but excludes image types such as
@@ -996,6 +1119,7 @@ public class CvUploadTest {
      *
      * @throws Exception if login or page navigation fails
      */
+
     @Test
     public void profilePage_fileInput_acceptAttributeOnlyAllowsDocFormats() throws Exception {
         loginAs(TA_USER, TA_PASSWORD);
@@ -1076,4 +1200,4 @@ public class CvUploadTest {
             }
         });
     }
-}
+

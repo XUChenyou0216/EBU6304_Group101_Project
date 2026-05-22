@@ -112,8 +112,10 @@ public class Notification {
      *   <li>{@code APPLICATION_SUBMITTED} → "primary" (blue)</li>
      *   <li>others                  → "secondary" (grey)</li>
      * </ul>
+
      *
      * @return Bootstrap contextual colour name for UI rendering
+
      */
     public String getColor() {
         if (type == null) return "secondary";
@@ -126,6 +128,7 @@ public class Notification {
         }
     }
 
+
     /**
      * Parses a CSV row into a {@link Notification} instance.
      * Uses {@link Job#parseCsv(String)} to handle quoted message fields.
@@ -133,6 +136,7 @@ public class Notification {
      * @param row a single CSV line (without header)
      * @return a populated notification, or {@code null} if the row has fewer than six fields
      */
+
     public static Notification fromCsvRow(String row) {
         String[] f = Job.parseCsv(row);
         if (f.length < 6) return null;

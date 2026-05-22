@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
+
 /**
  * Concurrency tests for CSV-backed DAO persistence under parallel access.
  *
@@ -50,6 +51,11 @@ public class CsvConcurrencyTest {
      *
      * @throws IOException if the directory cannot be deleted or created
      */
+
+public class CsvConcurrencyTest {
+    private static final String DATA_DIR = "target/test-data-concurrency";
+
+
     @Before
     public void resetDataDir() throws IOException {
         Path dataPath = Paths.get(DATA_DIR);
@@ -59,12 +65,14 @@ public class CsvConcurrencyTest {
         Files.createDirectories(dataPath);
     }
 
+
     /**
      * Verifies that concurrent application saves each receive a unique generated
      * application identifier and that all rows are persisted.
      *
      * @throws Exception if concurrent execution or DAO operations fail
      */
+
     @Test
     public void concurrentApplicationsGetUniqueIds() throws Exception {
         int threadCount = 32;
@@ -83,12 +91,14 @@ public class CsvConcurrencyTest {
         assertEquals(threadCount, dao.findAll().size());
     }
 
+
     /**
      * Verifies that concurrent duplicate application attempts for the same TA
      * and job result in exactly one persisted row.
      *
      * @throws Exception if concurrent execution or DAO operations fail
      */
+
     @Test
     public void concurrentDuplicateApplicationsOnlySaveOnce() throws Exception {
         int threadCount = 24;
@@ -105,12 +115,14 @@ public class CsvConcurrencyTest {
         assertEquals(1, dao.findByTa("TA_DUP").size());
     }
 
+
     /**
      * Verifies that concurrent user registrations each receive a unique user
      * identifier when saved through {@link UserDAO#saveIfUsernameAvailable(User)}.
      *
      * @throws Exception if concurrent execution or DAO operations fail
      */
+
     @Test
     public void concurrentUsersGetUniqueIds() throws Exception {
         int threadCount = 32;
@@ -128,12 +140,14 @@ public class CsvConcurrencyTest {
         assertEquals(threadCount, dao.findAll().size());
     }
 
+
     /**
      * Verifies that concurrent updates to distinct application rows do not
      * lose data and that each row retains its own review note after update.
      *
      * @throws Exception if concurrent execution or DAO operations fail
      */
+
     @Test
     public void concurrentUpdatesDoNotLoseRows() throws Exception {
         int threadCount = 16;
@@ -196,6 +210,7 @@ public class CsvConcurrencyTest {
 
     private static void deleteRecursively(Path path) throws IOException {
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
             /**
              * Deletes each visited file during recursive directory cleanup.
              *
@@ -204,13 +219,14 @@ public class CsvConcurrencyTest {
              * @return {@link FileVisitResult#CONTINUE} to proceed with remaining entries
              * @throws IOException if the file cannot be deleted
              */
+
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
 
-            /**
+         /**
              * Deletes each directory after its contents have been visited.
              *
              * @param dir path to the directory being visited
@@ -218,6 +234,7 @@ public class CsvConcurrencyTest {
              * @return {@link FileVisitResult#CONTINUE} to proceed with remaining directories
              * @throws IOException if the directory cannot be deleted or if {@code exc} is non-null
              */
+
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 Files.delete(dir);

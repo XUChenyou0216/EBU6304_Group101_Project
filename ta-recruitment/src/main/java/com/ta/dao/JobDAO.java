@@ -128,6 +128,7 @@ public class JobDAO {
         FileManager.appendRow(filePath, Job.CSV_HEADER, job.toCsvRow());
     }
 
+
     /**
      * Appends a job row and assigns the next generated id with prefix {@code J}.
      * <p>
@@ -137,6 +138,7 @@ public class JobDAO {
      * @param job the job to save; fields other than id should be populated by the caller
      * @return the generated job id, or {@code null} if append failed
      */
+
     public String saveWithNextId(Job job) {
         String generatedId = FileManager.appendWithGeneratedId(filePath, Job.CSV_HEADER, "J", id -> {
             job.setJobId(id);
@@ -148,11 +150,13 @@ public class JobDAO {
         return generatedId;
     }
 
+
     /**
      * Replaces the CSV row matching {@link Job#getJobId()} on the updated object.
      *
      * @param updated job with new field values and the same job id
      */
+
     public void update(Job updated) {
         FileManager.updateRows(filePath, Job.CSV_HEADER, rows -> {
             List<String> newRows = new ArrayList<>();

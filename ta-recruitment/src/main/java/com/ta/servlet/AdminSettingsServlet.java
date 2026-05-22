@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
 /**
  * Servlet for administrators to view and update system configuration, especially AI integration settings.
  * <p>
@@ -29,6 +30,10 @@ public class AdminSettingsServlet extends HttpServlet {
      * @throws ServletException if the request dispatcher fails
      * @throws IOException      if forwarding or sending an error response fails
      */
+
+public class AdminSettingsServlet extends HttpServlet {
+
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -57,6 +62,7 @@ public class AdminSettingsServlet extends HttpServlet {
         req.getRequestDispatcher("/admin/settings.jsp").forward(req, resp);
     }
 
+
     /**
      * Persists AI configuration submitted from the settings form.
      * The API key is only overwritten when a non-empty value without placeholder masking is supplied.
@@ -67,6 +73,7 @@ public class AdminSettingsServlet extends HttpServlet {
      * @throws ServletException if servlet processing fails
      * @throws IOException      if redirecting or sending an error response fails
      */
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

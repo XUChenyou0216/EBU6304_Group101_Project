@@ -73,6 +73,7 @@ public class UserDAO {
         FileManager.appendRow(filePath, User.CSV_HEADER, user.toCsvRow());
     }
 
+
     /**
      * Appends a new user only if no existing row has the same username (case-insensitive).
      * <p>
@@ -83,6 +84,7 @@ public class UserDAO {
      * @param user the user to insert; username must be unique
      * @return {@code true} if the row was written; {@code false} if a duplicate username exists
      */
+
     public boolean saveIfUsernameAvailable(User user) {
         return FileManager.appendIfAbsent(
                 filePath,
@@ -99,12 +101,14 @@ public class UserDAO {
         );
     }
 
+
     /**
      * Replaces the CSV row whose user id matches {@link User#getUserId()} on the
      * given object; all other rows are left unchanged.
      *
      * @param updated the user record with the new field values
      */
+
     public void update(User updated) {
         FileManager.updateRows(filePath, User.CSV_HEADER, rows -> {
             List<String> newRows = new ArrayList<>();
@@ -118,6 +122,7 @@ public class UserDAO {
         });
     }
 
+
     /**
      * Removes the user with the specified id from the backing file.
      * <p>
@@ -126,6 +131,7 @@ public class UserDAO {
      *
      * @param userId the id of the user to delete
      */
+
     public void delete(String userId) {
         List<String> rows = FileManager.readAll(filePath);
         List<String> newRows = new ArrayList<>();
@@ -138,11 +144,13 @@ public class UserDAO {
         FileManager.writeAll(filePath, User.CSV_HEADER, newRows);
     }
 
+
     /**
      * Computes the next available user id using prefix {@code U} without persisting a row.
      *
      * @return the next id string (for example {@code U001})
      */
+main
     public String generateNextId() {
         return FileManager.generateNextId(filePath, "U");
     }

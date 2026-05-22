@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+
 /**
  * Servlet for administrators to list all users and perform account lifecycle actions.
  * <p>
@@ -27,6 +28,11 @@ public class AdminUserServlet extends HttpServlet {
      * @throws ServletException if the request dispatcher fails
      * @throws IOException      if forwarding fails
      */
+
+@WebServlet("/admin/users")
+public class AdminUserServlet extends HttpServlet {
+
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String dataDir = SessionUtil.getDataDir(req);
@@ -35,6 +41,7 @@ public class AdminUserServlet extends HttpServlet {
         req.setAttribute("allUsers", dao.findAll());
         req.getRequestDispatcher("/admin/users.jsp").forward(req, resp);
     }
+
 
     /**
      * Processes user management actions: suspend, activate, or delete.
@@ -45,6 +52,7 @@ public class AdminUserServlet extends HttpServlet {
      * @throws ServletException if servlet processing fails
      * @throws IOException      if redirecting fails
      */
+
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -73,4 +81,3 @@ public class AdminUserServlet extends HttpServlet {
 
         resp.sendRedirect(req.getContextPath() + "/admin/users?success=" + action);
     }
-}

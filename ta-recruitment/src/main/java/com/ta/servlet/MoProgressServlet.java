@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+
  * Servlet that prepares recruitment progress metrics for the MO progress dashboard.
  * <p>
  * URL mapping: {@code /mo/progress} (declared in {@code WEB-INF/web.xml}).
@@ -34,6 +35,12 @@ public class MoProgressServlet extends HttpServlet {
      * @throws ServletException if the request dispatcher fails
      * @throws IOException      if redirecting or forwarding fails
      */
+
+ * Canonical route {@code /mo/progress} prepares recruitment progress metrics for the JSP view.
+ */
+public class MoProgressServlet extends HttpServlet {
+
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

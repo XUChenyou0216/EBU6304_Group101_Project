@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+
 /**
  * Client for invoking large-language-model APIs configured via {@link ConfigDAO}.
  * <p>
@@ -35,6 +36,10 @@ public class AIService {
      * @throws IOException          if the HTTP request fails or the API returns a non-200 status
      * @throws InterruptedException if the HTTP client is interrupted while waiting for a response
      */
+
+public class AIService {
+
+
     public static String call(ConfigDAO config, String prompt) throws IOException, InterruptedException {
         String provider = config.get("ai.provider");
         String apiKey   = config.get("ai.api.key");

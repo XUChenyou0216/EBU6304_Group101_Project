@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
+
  * Admin servlet for US-A02: AI-assisted workload balancing and reassignment recommendations.
  * <p>
  * URL mapping: {@code /admin/ai-workload} via {@link WebServlet}.
@@ -36,13 +37,20 @@ import java.util.*;
  *
  * @see AdminWorkloadServlet
  * @see com.ta.util.AIService
+
+ * US-A02: AI-assisted workload balancing.
+ * Separates anomaly detection (always shown) from redistribution recommendations
+ * (AI-powered when API key configured, rule-based otherwise).
+
  */
 @WebServlet("/admin/ai-workload")
 public class AIWorkloadServlet extends HttpServlet {
 
+
     /**
      * View model for a suggested transfer of one accepted application from an overloaded TA to another.
      */
+
     public static class WorkloadRecommendation implements Serializable {
         private final String applicationId;
         private final String fromTaId;
@@ -56,6 +64,7 @@ public class AIWorkloadServlet extends HttpServlet {
         private final int toNewHours;
         private final int confidence;
         private final String reasoning;
+
 
         /**
          * Constructs a workload redistribution recommendation for display and apply actions.
@@ -73,6 +82,7 @@ public class AIWorkloadServlet extends HttpServlet {
          * @param confidence       recommendation confidence score (0–100)
          * @param reasoning        explanation text from AI or rule engine
          */
+
         public WorkloadRecommendation(String applicationId,
                 String fromTaId, String fromTaName,
                 String toTaId, String toTaName,
@@ -93,6 +103,7 @@ public class AIWorkloadServlet extends HttpServlet {
             this.confidence       = confidence;
             this.reasoning        = reasoning;
         }
+
 
         /** @return the application identifier to reassign */
         public String getApplicationId()  { return applicationId; }
@@ -128,6 +139,22 @@ public class AIWorkloadServlet extends HttpServlet {
      * @throws ServletException if the request dispatcher fails
      * @throws IOException      if forwarding or sending forbidden fails
      */
+
+        public String getApplicationId()  { return applicationId; }
+        public String getFromTaId()       { return fromTaId; }
+        public String getFromTaName()     { return fromTaName; }
+        public String getToTaId()         { return toTaId; }
+        public String getToTaName()       { return toTaName; }
+        public String getJobLabel()       { return jobLabel; }
+        public int getFromCurrentHours()  { return fromCurrentHours; }
+        public int getFromNewHours()      { return fromNewHours; }
+        public int getToCurrentHours()    { return toCurrentHours; }
+        public int getToNewHours()        { return toNewHours; }
+        public int getConfidence()        { return confidence; }
+        public String getReasoning()      { return reasoning; }
+    }
+
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -216,6 +243,7 @@ public class AIWorkloadServlet extends HttpServlet {
         req.getRequestDispatcher("/admin/ai-workload.jsp").forward(req, resp);
     }
 
+
     /**
      * Applies an admin-approved reassignment by updating the application's TA and review note.
      *
@@ -225,6 +253,7 @@ public class AIWorkloadServlet extends HttpServlet {
      * @throws ServletException if servlet processing fails
      * @throws IOException      if redirecting or sending forbidden fails
      */
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

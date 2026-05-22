@@ -173,6 +173,7 @@ public class ApplicationDAO {
         FileManager.appendRow(filePath, Application.CSV_HEADER, app.toCsvRow());
     }
 
+
     /**
      * Appends an application and assigns the next id with prefix {@code APP}.
      *
@@ -199,6 +200,7 @@ public class ApplicationDAO {
      * @param app the application to insert
      * @return {@code true} if written; {@code false} if a duplicate TA–job application exists
      */
+
     public boolean saveIfNotApplied(Application app) {
         return FileManager.appendIfAbsent(
                 filePath,
@@ -217,12 +219,14 @@ public class ApplicationDAO {
         );
     }
 
+
     /**
      * Replaces the CSV row whose application id matches {@link Application#getApplicationId()}
      * on the given object.
      *
      * @param updated application with new field values
      */
+
     public void update(Application updated) {
         FileManager.updateRows(filePath, Application.CSV_HEADER, rows -> {
             List<String> newRows = new ArrayList<>();

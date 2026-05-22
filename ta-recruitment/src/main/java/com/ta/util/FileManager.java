@@ -26,6 +26,7 @@ import java.util.function.Predicate;
 public class FileManager {
     private static final ConcurrentHashMap<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
 
+
     /**
      * Functional interface for constructing a new CSV row when a generated identifier is available.
      *
@@ -68,6 +69,18 @@ public class FileManager {
      * @param filePath absolute or relative path to the CSV file
      * @return a list of data row strings (never {@code null}); empty if the file is missing or unreadable
      */
+
+    @FunctionalInterface
+    public interface RowFactory {
+        String create(String generatedId);
+    }
+
+    @FunctionalInterface
+    public interface RowTransformer {
+        List<String> transform(List<String> rows);
+    }
+
+
     public static List<String> readAll(String filePath) {
         File file = new File(filePath);
         if (!file.exists()) return new ArrayList<>();
@@ -78,6 +91,7 @@ public class FileManager {
             return new ArrayList<>();
         }
     }
+
 
     /**
      * Appends a single data row to the end of a CSV file.
@@ -90,6 +104,7 @@ public class FileManager {
      * @param csvHeader  the header line to write when the file is new or empty
      * @param row        the data row to append (without trailing line separator)
      */
+
     public static void appendRow(String filePath, String csvHeader, String row) {
         try {
             withLockedFile(filePath, true, (raf, channel) -> {
@@ -102,6 +117,7 @@ public class FileManager {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
+
     /**
      * Replaces the entire contents of a CSV file with a new header and data rows.
      * <p>
@@ -112,6 +128,7 @@ public class FileManager {
      * @param csvHeader  the header line to write as the first line
      * @param rows       the complete list of data rows to persist (header excluded)
      */
+
     public static void writeAll(String filePath, String csvHeader, List<String> rows) {
         try {
             withLockedFile(filePath, true, (raf, channel) -> {
@@ -120,6 +137,7 @@ public class FileManager {
             });
         } catch (IOException e) { e.printStackTrace(); }
     }
+
 
     /**
      * Reads existing rows, generates the next sequential identifier, appends a new row,
@@ -131,6 +149,7 @@ public class FileManager {
      * @param rowFactory callback that builds the new row from the generated identifier
      * @return the generated identifier on success, or {@code null} if an I/O error occurs
      */
+
     public static String appendWithGeneratedId(String filePath, String csvHeader, String prefix, RowFactory rowFactory) {
         try {
             return withLockedFile(filePath, true, (raf, channel) -> {
@@ -146,6 +165,7 @@ public class FileManager {
         }
     }
 
+
     /**
      * Appends a new row only if no existing row satisfies the given existence predicate.
      * <p>
@@ -160,6 +180,7 @@ public class FileManager {
      * @return {@code true} if a new row was appended, {@code false} if a matching row already
      *         exists or an I/O error occurs
      */
+
     public static boolean appendIfAbsent(String filePath, String csvHeader,
                                          Predicate<String> existsPredicate,
                                          Function<List<String>, String> rowFactory) {
@@ -179,6 +200,7 @@ public class FileManager {
         }
     }
 
+
     /**
      * Reads all data rows, applies a transformation, and writes the result back to the file.
      *
@@ -187,6 +209,7 @@ public class FileManager {
      * @param transformer callback that receives a copy of the current rows and returns the
      *                    updated list to persist
      */
+
     public static void updateRows(String filePath, String csvHeader, RowTransformer transformer) {
         try {
             withLockedFile(filePath, true, (raf, channel) -> {
@@ -210,6 +233,7 @@ public class FileManager {
         return nextId(rows, prefix);
     }
 
+
     /**
      * Computes the next sequential identifier from an in-memory list of CSV rows.
      * <p>
@@ -223,6 +247,7 @@ public class FileManager {
      * @param prefix the identifier prefix to match and prepend
      * @return the next identifier string
      */
+
     public static String nextId(List<String> rows, String prefix) {
         int maxNum = 0;
         for (String row : rows) {

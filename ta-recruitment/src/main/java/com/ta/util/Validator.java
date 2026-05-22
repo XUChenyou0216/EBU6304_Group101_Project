@@ -43,6 +43,7 @@ public class Validator {
         return null;
     }
 
+
     /**
      * Validates that a password meets minimum strength requirements.
      * <p>
@@ -53,6 +54,7 @@ public class Validator {
      * @param pwd the password to validate
      * @return {@code null} if valid, or a descriptive error message otherwise
      */
+
     public static String validateStrongPassword(String pwd) {
         if (pwd == null || pwd.length() < 6) return "Password must be at least 6 characters.";
         if (!pwd.matches(".*[A-Z].*")) return "Password must contain at least one uppercase letter.";
@@ -61,12 +63,14 @@ public class Validator {
         return null;
     }
 
+
     /**
      * Validates an email address for presence and basic format.
      *
      * @param email the email address to validate
      * @return {@code null} if valid, or an error message if missing or malformed
      */
+
     public static String validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) return "Email is required.";
         if (!EMAIL_RE.matcher(email.trim()).matches()) return "Invalid email format.";
@@ -174,12 +178,14 @@ public class Validator {
         return err;
     }
 
+
     /**
      * Sanitizes a string for safe inclusion in a CSV field by replacing line breaks with spaces.
      *
      * @param input the raw input string (may be {@code null})
      * @return the sanitized string, or an empty string if {@code input} is {@code null}
      */
+
     public static String sanitizeForCsv(String input) {
         if (input == null) return "";
         return input.replace("\r\n", " ").replace("\n", " ").replace("\r", " ");

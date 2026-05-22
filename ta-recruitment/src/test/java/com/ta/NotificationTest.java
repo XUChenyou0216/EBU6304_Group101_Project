@@ -18,6 +18,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 /**
+
  * Unit tests for the TA recruitment notification system.
  *
  * <p>This test class validates notification type constants, UI color mapping,
@@ -73,6 +74,29 @@ public class NotificationTest {
      * persistence never writes to the application's real data directory.
      * The folder and its contents are removed after each test completes.</p>
      */
+
+ * Notification system unit tests.
+ *
+ * Covers:
+ *   1. Type constants and color mapping (Notification model)
+ *   2. MO receives a JOB_POSTED notification when a job is saved
+ *   3. Admin receives a WORKLOAD_ALERT when a TA's estimated hours exceed the limit
+ *   4. Workload-alert deduplication (second alert not created while first is unread)
+ *   5. Alert is re-created after the first one is marked read
+ *   6. No alert when workload is within the limit
+ *   7. Boundary: exactly 3 accepted jobs (48 h) does NOT trigger alert
+ *   8. Boundary: 4 accepted jobs (64 h) triggers alert
+ *   9. NotificationDAO CRUD (save, findByUser, countUnread, markRead, markAllRead)
+ *
+ * Workload constants (from AdminWorkloadServlet):
+ *   HOURS_PER_ACCEPTED_ASSIGNMENT = 16
+ *   WORKLOAD_LIMIT_HOURS          = 48   (i.e. > 3 accepted jobs → exceeded)
+ *
+ * Run with: mvn -Dtest=NotificationTest test
+ */
+public class NotificationTest {
+
+
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
@@ -84,6 +108,7 @@ public class NotificationTest {
     // 1. TYPE CONSTANTS
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Verifies that all {@link Notification} type constant strings match their
      * expected literal values used throughout the application.
@@ -93,6 +118,7 @@ public class NotificationTest {
      * string so that servlet logic, DAO persistence, and UI filtering remain
      * consistent.</p>
      */
+
     @Test
     public void typeConstants_haveExpectedValues() {
         assertEquals("APPLICATION_SUBMITTED", Notification.TYPE_APPLICATION_SUBMITTED);
@@ -105,6 +131,7 @@ public class NotificationTest {
     // 2. COLOR MAPPING
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Asserts that a {@code JOB_POSTED} notification maps to the {@code success}
      * Bootstrap-style color token via {@link Notification#getColor()}.
@@ -112,11 +139,13 @@ public class NotificationTest {
      * <p>Confirms that newly posted job notifications render with a positive
      * (green) visual indicator in the UI.</p>
      */
+
     @Test
     public void jobPosted_colorIsSuccess() {
         Notification n = notifOf(Notification.TYPE_JOB_POSTED);
         assertEquals("success", n.getColor());
     }
+
 
     /**
      * Asserts that a {@code WORKLOAD_ALERT} notification maps to the {@code danger}
@@ -125,11 +154,13 @@ public class NotificationTest {
      * <p>Confirms that workload-overload alerts render with a critical (red)
      * visual indicator in the UI.</p>
      */
+
     @Test
     public void workloadAlert_colorIsDanger() {
         Notification n = notifOf(Notification.TYPE_WORKLOAD_ALERT);
         assertEquals("danger", n.getColor());
     }
+
 
     /**
      * Asserts that a {@code STATUS_UPDATED} notification maps to the {@code info}
@@ -138,11 +169,13 @@ public class NotificationTest {
      * <p>Confirms that application status-change notifications render with a
      * neutral informational (blue) visual indicator.</p>
      */
+
     @Test
     public void statusUpdated_colorIsInfo() {
         Notification n = notifOf(Notification.TYPE_STATUS_UPDATED);
         assertEquals("info", n.getColor());
     }
+
 
     /**
      * Asserts that an {@code APPLICATION_SUBMITTED} notification maps to the
@@ -151,11 +184,13 @@ public class NotificationTest {
      * <p>Confirms that new application submissions render with the primary
      * (brand) visual indicator in the UI.</p>
      */
+
     @Test
     public void applicationSubmitted_colorIsPrimary() {
         Notification n = notifOf(Notification.TYPE_APPLICATION_SUBMITTED);
         assertEquals("primary", n.getColor());
     }
+
 
     /**
      * Asserts that an unrecognised notification type falls back to the
@@ -164,11 +199,13 @@ public class NotificationTest {
      * <p>Ensures the model degrades gracefully when persisted data contains an
      * unknown type string rather than throwing or returning {@code null}.</p>
      */
+
     @Test
     public void unknownType_colorIsSecondary() {
         Notification n = notifOf("UNKNOWN_TYPE");
         assertEquals("secondary", n.getColor());
     }
+
 
     /**
      * Asserts that a {@code null} notification type falls back to the
@@ -177,6 +214,7 @@ public class NotificationTest {
      * <p>Ensures the model handles missing or corrupt type values without
      * failing at render time.</p>
      */
+
     @Test
     public void nullType_colorIsSecondary() {
         Notification n = notifOf(null);
@@ -186,6 +224,7 @@ public class NotificationTest {
     // ─────────────────────────────────────────────────────────────────────
     // 3. MO JOB-POSTED NOTIFICATION
     // ─────────────────────────────────────────────────────────────────────
+
 
     /**
      * Simulates the notification created by {@link com.ta.servlet.PostJobServlet}
@@ -203,6 +242,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void moReceivesJobPostedNotification_afterJobSaved() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -227,6 +267,7 @@ public class NotificationTest {
         assertEquals("success", saved.getColor());
     }
 
+
     /**
      * Verifies that {@link NotificationDAO#generateNextId()} produces identifiers
      * prefixed with {@code NTF}, consistent with the application's ID convention.
@@ -236,6 +277,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO initialisation fails
      */
+
     @Test
     public void jobPostedNotification_idStartsWithNtf() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -243,6 +285,7 @@ public class NotificationTest {
         String id = dao.generateNextId();
         assertTrue("Generated ID should start with NTF", id.startsWith("NTF"));
     }
+
 
     /**
      * Confirms that editing an existing job does not implicitly create a
@@ -256,6 +299,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void editJob_doesNotProduceJobPostedNotification() throws Exception {
         // PostJobServlet only creates a notification in the "create" branch.
@@ -273,6 +317,7 @@ public class NotificationTest {
     // 4. WORKLOAD CONSTANTS
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Asserts that the mirrored workload constants match the values defined in
      * {@link AdminWorkloadServlet} (16 hours per assignment, 48-hour limit).
@@ -280,11 +325,13 @@ public class NotificationTest {
      * <p>Guards against accidental drift between production servlet constants and
      * test expectations used throughout this class.</p>
      */
+
     @Test
     public void workloadConstants_matchDefinition() {
         assertEquals("HOURS_PER_ACCEPTED_ASSIGNMENT must be 16", 16, HOURS_PER);
         assertEquals("WORKLOAD_LIMIT_HOURS must be 48",          48, LIMIT);
     }
+
 
     /**
      * Verifies the boundary condition where exactly three accepted assignments
@@ -293,12 +340,14 @@ public class NotificationTest {
      * <p>Uses the same {@code hours &gt; LIMIT} comparison as
      * {@link AdminWorkloadServlet} and {@code saveAlertIfNeeded}.</p>
      */
+
     @Test
     public void threeAcceptedJobs_isExactlyAtLimit_notExceeded() {
         int hours   = 3 * HOURS_PER;   // 48
         boolean exceeded = hours > LIMIT;
         assertFalse("Exactly 48 h (3 accepted jobs) must NOT be flagged as exceeded", exceeded);
     }
+
 
     /**
      * Verifies that four accepted assignments (64 hours) exceed the 48-hour limit
@@ -307,6 +356,7 @@ public class NotificationTest {
      * <p>Uses the same {@code hours &gt; LIMIT} comparison as
      * {@link AdminWorkloadServlet} and {@code saveAlertIfNeeded}.</p>
      */
+
     @Test
     public void fourAcceptedJobs_exceedsLimit() {
         int hours   = 4 * HOURS_PER;   // 64
@@ -317,6 +367,7 @@ public class NotificationTest {
     // ─────────────────────────────────────────────────────────────────────
     // 5. WORKLOAD ALERT NOTIFICATION — creation
     // ─────────────────────────────────────────────────────────────────────
+
 
     /**
      * Simulates {@link AdminWorkloadServlet} alert creation when a TA exceeds the
@@ -333,6 +384,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void adminReceivesWorkloadAlert_whenTaExceedsLimit() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -359,6 +411,7 @@ public class NotificationTest {
         assertEquals("danger", alert.getColor());
     }
 
+
     /**
      * Verifies that no {@code WORKLOAD_ALERT} is created when a TA's estimated
      * hours are exactly at the limit (48 h) and therefore not exceeded.
@@ -371,6 +424,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void noAlert_whenTaIsWithinLimit() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -392,6 +446,7 @@ public class NotificationTest {
     // 6. WORKLOAD ALERT DEDUPLICATION
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Verifies that a second {@code WORKLOAD_ALERT} is suppressed while an unread
      * alert for the same TA already exists for the admin (deduplication on
@@ -405,6 +460,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void secondAlert_notCreated_whileFirstIsUnread() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -424,6 +480,7 @@ public class NotificationTest {
         assertEquals("Only 1 alert should exist (duplicate suppressed)", 1, alerts.size());
     }
 
+
     /**
      * Verifies that a new {@code WORKLOAD_ALERT} is created after the previous
      * unread alert for the same TA has been marked read, leaving exactly one
@@ -437,6 +494,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void alertRecreated_afterFirstIsMarkedRead() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -468,6 +526,7 @@ public class NotificationTest {
     // 7. WORKLOAD COMPUTED FROM REAL APPLICATION DATA
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Loads four accepted applications from CSV via {@link ApplicationDAO} and
      * verifies that the derived estimated hours (64) exceed the 48-hour limit.
@@ -481,6 +540,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary file creation or DAO I/O fails
      */
+
     @Test
     public void workloadExceededFlag_derivedFromApplicationDAO() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -506,6 +566,7 @@ public class NotificationTest {
         assertTrue("64 h must exceed the 48-h limit", exceeded);
     }
 
+
     /**
      * Loads three accepted applications from CSV via {@link ApplicationDAO} and
      * verifies that the derived estimated hours (48) do not exceed the limit.
@@ -518,6 +579,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary file creation or DAO I/O fails
      */
+
     @Test
     public void workloadNotExceeded_withThreeAcceptedApplications() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -545,6 +607,7 @@ public class NotificationTest {
     // 8. NotificationDAO CRUD
     // ─────────────────────────────────────────────────────────────────────
 
+
     /**
      * Verifies that {@link NotificationDAO#save(Notification)} persists notifications
      * and {@link NotificationDAO#findByUser(String)} returns only the notifications
@@ -557,6 +620,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void save_andFindByUser() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -571,6 +635,7 @@ public class NotificationTest {
         assertEquals("U2 should have 1 notification",  1, dao.findByUser("U2").size());
     }
 
+
     /**
      * Verifies that {@link NotificationDAO#countUnread(String)} counts only unread
      * notifications for the specified user and ignores read entries.
@@ -582,6 +647,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void countUnread_onlyCountsUnreadForGivenUser() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -594,6 +660,7 @@ public class NotificationTest {
         assertEquals("U1 should have 2 unread notifications", 2, dao.countUnread("U1"));
     }
 
+
     /**
      * Verifies that {@link NotificationDAO#markRead(String)} marks a single
      * notification as read and reduces the unread count to zero.
@@ -604,6 +671,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void markRead_setsIsReadTrue() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -616,6 +684,7 @@ public class NotificationTest {
         assertEquals("After markRead, unread count must be 0", 0, dao.countUnread("U1"));
     }
 
+
     /**
      * Verifies that {@link NotificationDAO#markAllRead(String)} marks all unread
      * notifications for the given user as read without affecting other users.
@@ -627,6 +696,7 @@ public class NotificationTest {
      *
      * @throws Exception if temporary directory creation or DAO I/O fails
      */
+
     @Test
     public void markAllRead_setsAllUnreadToRead() throws Exception {
         File dataDir = folder.newFolder("data");
@@ -642,6 +712,7 @@ public class NotificationTest {
         assertEquals("U2 notification must remain unread",  1, dao.countUnread("U2"));
     }
 
+
     /**
      * Verifies that serialising a {@link Notification} to CSV via
      * {@link Notification#toCsvRow()} and deserialising via
@@ -652,6 +723,7 @@ public class NotificationTest {
      * CSV escaping. Asserts identity of all persisted fields plus
      * {@link Notification#getColor()} ({@code danger}).</p>
      */
+
     @Test
     public void csvRoundTrip_preservesAllFields() {
         Notification original = new Notification(
@@ -675,10 +747,15 @@ public class NotificationTest {
     // Helper methods
     // ─────────────────────────────────────────────────────────────────────
 
+
     /** Creates a {@link Notification} with {@code isRead=false} for color-mapping tests. */
+
+    /** Create a Notification with isRead=false. */
+
     private static Notification notifOf(String type) {
         return new Notification("NTF_X", "USER_X", type, "msg", false, "2026-05-02");
     }
+
 
     /**
      * Builds an unread {@link Notification} with today's date for DAO persistence tests.
@@ -689,9 +766,11 @@ public class NotificationTest {
      * @param msg    human-readable message body
      * @return a new unread notification instance
      */
+
     private static Notification buildNotif(String id, String userId, String type, String msg) {
         return new Notification(id, userId, type, msg, false, LocalDate.now().toString());
     }
+
 
     /**
      * Builds a {@link Notification} with an explicit read flag for DAO query tests.
@@ -703,6 +782,7 @@ public class NotificationTest {
      * @param isRead whether the notification has already been read
      * @return a new notification instance with the requested read state
      */
+
     private static Notification buildNotif(String id, String userId, String type,
                                            String msg, boolean isRead) {
         return new Notification(id, userId, type, msg, isRead, LocalDate.now().toString());
@@ -746,4 +826,4 @@ public class NotificationTest {
         }
         return result;
     }
-}
+
