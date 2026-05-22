@@ -1,4 +1,20 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    if (request.getAttribute("config") == null) {
+        response.sendRedirect(request.getContextPath() + "/admin/settings");
+        return;
+    }
+    boolean saved = Boolean.TRUE.equals(request.getAttribute("saved"));
+    String aiProvider = (String) request.getAttribute("aiProvider");
+    String aiModel    = (String) request.getAttribute("aiModel");
+    String aiBaseUrl  = (String) request.getAttribute("aiBaseUrl");
+    String maskedKey  = (String) request.getAttribute("maskedApiKey");
+    boolean hasApiKey = Boolean.TRUE.equals(request.getAttribute("hasApiKey"));
+    if (aiProvider == null) aiProvider = "anthropic";
+    if (aiModel    == null) aiModel    = "claude-haiku-4-5-20251001";
+    if (aiBaseUrl  == null) aiBaseUrl  = "https://api.openai.com/v1";
+    if (maskedKey  == null) maskedKey  = "";
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,10 +57,9 @@
             <h1>Settings</h1>
             <p>Configure system preferences and policies</p>
         </div>
-        <button class="btn btn-primary" onclick="alert('Settings saved!')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            Save Changes
-        </button>
+        <% if (saved) { %>
+        <span style="color:#16a34a;font-size:13px;font-weight:600;">&#10003; Saved</span>
+        <% } %>
     </div>
 
     <div class="settings-layout">
@@ -79,7 +94,7 @@
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">University Name</div>
-                    <input type="text" class="setting-input" value="BUPT International School">
+                    <input type="text" class="setting-input" value="Queen Mary University of London">
                 </div>
                 <div class="setting-row">
                     <div class="setting-label">Academic Year</div>
@@ -93,14 +108,66 @@
                     <div style="display:flex;gap:12px;">
                         <div>
                             <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Start Date</div>
-                            <input type="date" class="setting-input" value="2026-01-15">
+                            <input type="date" class="setting-input" value="2026-03-01">
                         </div>
                         <div>
                             <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">End Date</div>
-                            <input type="date" class="setting-input" value="2026-04-30">
+                            <input type="date" class="setting-input" value="2026-06-30">
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- AI Configuration -->
+            <div id="tab-ai" class="settings-card">
+                <h3>AI Configuration</h3>
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;">
+                    Configure the AI API used for workload balancing recommendations on the
+                    <a href="<%= request.getContextPath() %>/admin/ai-workload">AI Workload</a> page.
+                    Supports Anthropic Claude and any OpenAI-compatible provider (OpenAI, DeepSeek, Gemini, Groq, etc.).
+                </p>
+                <form method="post" action="<%= request.getContextPath() %>/admin/settings">
+                    <div class="setting-row" style="margin-bottom:16px;">
+                        <div class="setting-label">Provider</div>
+                        <select class="setting-input" name="ai.provider" id="providerSelect" onchange="toggleBaseUrl()">
+                            <option value="anthropic"  <%= "anthropic".equals(aiProvider)  ? "selected" : "" %>>Anthropic Claude</option>
+                            <option value="openai"     <%= "openai".equals(aiProvider)     ? "selected" : "" %>>OpenAI-compatible (OpenAI / DeepSeek / Gemini / Groq…)</option>
+                        </select>
+                    </div>
+                    <div class="setting-row" style="margin-bottom:16px;" id="baseUrlRow">
+                        <div class="setting-label">Base URL</div>
+                        <input type="text" class="setting-input" name="ai.base.url"
+                               value="<%= aiBaseUrl %>"
+                               placeholder="https://api.openai.com/v1">
+                    </div>
+                    <div class="setting-row" style="margin-bottom:16px;">
+                        <div class="setting-label">Model</div>
+                        <input type="text" class="setting-input" name="ai.model"
+                               value="<%= aiModel %>"
+                               placeholder="claude-haiku-4-5-20251001 or gpt-4o-mini">
+                    </div>
+                    <div class="setting-row" style="margin-bottom:8px;">
+                        <div class="setting-label">API Key</div>
+                        <input type="password" class="setting-input" name="ai.api.key"
+                               placeholder="<%= hasApiKey ? "Leave blank to keep current key" : "Paste your API key here" %>"
+                               autocomplete="off">
+                    </div>
+                    <% if (hasApiKey) { %>
+                    <div class="setting-row" style="margin-bottom:16px;">
+                        <div class="setting-label"></div>
+                        <div style="font-size:12px;color:var(--text-muted);">
+                            Current key: <code><%= maskedKey %></code>
+                        </div>
+                    </div>
+                    <% } %>
+                    <div class="setting-row" style="margin-top:8px;">
+                        <div class="setting-label"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                            Save AI Settings
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <!-- Notification Preferences -->
@@ -133,6 +200,12 @@ function showTab(name) {
     document.querySelectorAll('.settings-nav a').forEach(function(a) { a.classList.remove('active'); });
     event.target.closest('a').classList.add('active');
 }
+function toggleBaseUrl() {
+    var sel = document.getElementById('providerSelect');
+    var row = document.getElementById('baseUrlRow');
+    if (sel) row.style.display = sel.value === 'openai' ? 'grid' : 'none';
+}
+document.addEventListener('DOMContentLoaded', toggleBaseUrl);
 </script>
 </body>
 </html>

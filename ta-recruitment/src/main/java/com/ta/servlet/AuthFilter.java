@@ -8,10 +8,35 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Authentication and role-based authorization filter applied to all application paths.
+ * <p>
+ * URL mapping: {@code /*} via {@link WebFilter}.
+ * Unauthenticated users are redirected to the login page; authenticated users must match
+ * the role required for {@code /ta/}, {@code /mo/}, or {@code /admin/} path prefixes.
+ * </p>
+ *
+ * @see SessionUtil
+ */
 @WebFilter("/*")
 public class AuthFilter implements Filter {
+
+    /**
+     * Initializes the filter. No configuration is required.
+     *
+     * @param config the filter configuration provided by the container
+     */
     public void init(FilterConfig config) {}
 
+    /**
+     * Enforces login and role checks before allowing the request to proceed.
+     *
+     * @param req   the incoming servlet request
+     * @param res   the servlet response
+     * @param chain the filter chain to invoke when access is granted
+     * @throws IOException      if redirecting or sending an error fails
+     * @throws ServletException if filter processing fails
+     */
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
@@ -45,5 +70,8 @@ public class AuthFilter implements Filter {
             || path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/images/");
     }
 
+    /**
+     * Releases filter resources. No cleanup is performed.
+     */
     public void destroy() {}
 }

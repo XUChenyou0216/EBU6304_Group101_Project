@@ -189,20 +189,11 @@
                 <div class="account-avatar <%= avClass %>"><%= uInitials %></div>
                 <div>
                     <div class="account-name"><%= u.getUsername() %></div>
-                    <div class="account-detail"><%= roleLabel %> &mdash; <%= u.getEmail() %></div>
+                    <div class="account-detail"><%= userRoleLabel %> &mdash; <%= u.getEmail() %></div>
                 </div>
             </div>
             <div class="account-actions">
                 <span class="<%= statusBadge %>"><%= u.getStatus() %></span>
-                <form action="${pageContext.request.contextPath}/admin/users" method="post" style="display:inline;margin:0;">
-                    <input type="hidden" name="userId" value="<%= u.getUserId() %>">
-                    <% if ("ACTIVE".equalsIgnoreCase(u.getStatus())) { %>
-                        <button type="submit" name="action" value="suspend" class="btn-outline-amber">Suspend</button>
-                    <% } else { %>
-                        <button type="submit" name="action" value="activate" class="btn-outline-green">Reactivate</button>
-                    <% } %>
-                    <button type="submit" name="action" value="delete" class="btn-outline-red" onclick="return confirm('Delete this user permanently?')">Delete</button>
-                </form>
             </div>
         </div>
         <% } %>

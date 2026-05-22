@@ -15,13 +15,26 @@ import java.io.PrintWriter;
 import java.util.List;
 
 /**
- * GET  /notifications        — returns current user's notifications as JSON
- * POST /notifications        — marks notification(s) as read
- *   params: action=markRead&id=NTF001  OR  action=markAllRead
+ * REST-style servlet for in-app notifications: list as JSON and mark as read.
+ * <p>
+ * URL mapping: {@code /notifications} via {@link WebServlet}.
+ * </p>
+ * <ul>
+ *   <li>GET — returns the current user's notifications as a JSON array (newest first)</li>
+ *   <li>POST — {@code action=markRead&id=NTF001} or {@code action=markAllRead}</li>
+ * </ul>
  */
 @WebServlet("/notifications")
 public class NotificationServlet extends HttpServlet {
 
+    /**
+     * Returns all notifications for the logged-in user as JSON.
+     *
+     * @param req  the HTTP request; session must contain the current user
+     * @param resp the HTTP response with {@code application/json} body
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if writing the response fails
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -50,6 +63,15 @@ public class NotificationServlet extends HttpServlet {
         out.print("]");
     }
 
+    /**
+     * Marks one or all notifications as read for the current user.
+     *
+     * @param req  the HTTP request with {@code action} ({@code markRead} or {@code markAllRead})
+     *             and optional {@code id} when marking a single notification
+     * @param resp the HTTP response with JSON body {@code {"ok":true}}
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if writing the response fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

@@ -3,6 +3,7 @@ package com.ta.servlet;
 import com.ta.dao.ApplicationDAO;
 import com.ta.dao.JobDAO;
 import com.ta.dao.NotificationDAO;
+import com.ta.dao.UserDAO;
 import com.ta.model.Application;
 import com.ta.model.Job;
 import com.ta.model.Notification;
@@ -19,16 +20,34 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Batch update application statuses from the MO applicants page.
- * POST {@code batchPayload}: {@code APP001,ACCEPTED;APP002,UNDER_REVIEW;...}
- * Optional {@code includeNotes=true} with {@code note_&lt;applicationId&gt;} for rows in the payload.
+ * Servlet for batch updating application statuses from the MO applicants review page.
+ * <p>
+ * URL mapping: {@code /mo/batch-update-applications} (declared in {@code WEB-INF/web.xml}).
+ * </p>
+ * <p>
+ * POST parameter {@code batchPayload}: semicolon-separated entries such as
+ * {@code APP001,ACCEPTED;APP002,UNDER_REVIEW;...}.
+ * Optional {@code includeNotes=true} with {@code note_&lt;applicationId&gt;} per row in the payload.
+ * Sends TA status notifications and admin workload alerts when applicable.
+ * </p>
  */
 public class MoBatchUpdateApplicationStatusServlet extends HttpServlet {
 
+    /**
+     * Applies status (and optional review note) updates for all operations in the batch payload.
+     *
+     * @param req  the HTTP POST request with {@code batchPayload}, optional {@code jobId},
+     *             {@code includeNotes}, and per-application {@code note_<applicationId>} fields
+     * @param resp the HTTP response; redirects to applicants page with success, error, or capacity warning
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -123,11 +142,59 @@ public class MoBatchUpdateApplicationStatusServlet extends HttpServlet {
             appDao.persistAll(all);
             NotificationDAO notifDAO = new NotificationDAO(dataDir);
             String today = LocalDate.now().toString();
+
+            // Notify each TA of their status change
             for (StatusNotify sn : pendingNotify) {
                 String taMsg = "Your application for \"" + sn.jobTitle + "\" (" + sn.moduleCode
                     + ") has been updated to: " + sn.status + ".";
                 notifDAO.save(new Notification(notifDAO.generateNextId(), sn.taUserId,
                     "STATUS_UPDATED", taMsg, false, today));
+            }
+
+            // Check workload limit for every TA that gained an ACCEPTED status in this batch
+            Set<String> acceptedTaIds = new HashSet<>();
+            for (StatusNotify sn : pendingNotify) {
+                if ("ACCEPTED".equals(sn.status)) {
+                    acceptedTaIds.add(sn.taUserId);
+                }
+            }
+            if (!acceptedTaIds.isEmpty()) {
+                UserDAO userDAO = new UserDAO(dataDir);
+                List<User> admins = new ArrayList<>();
+                for (User admin : userDAO.findAll()) {
+                    if ("ADMIN".equalsIgnoreCase(admin.getRole())) admins.add(admin);
+                }
+                for (String taId : acceptedTaIds) {
+                    long acceptedCount = all.stream()
+                            .filter(a -> taId.equals(a.getTaUserId())
+                                    && "ACCEPTED".equals(a.getStatus()))
+                            .count();
+                    int estimatedHours = (int) (acceptedCount
+                            * AdminWorkloadServlet.HOURS_PER_ACCEPTED_ASSIGNMENT);
+                    if (estimatedHours <= AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS) continue;
+
+                    User ta = userDAO.findById(taId);
+                    String taName   = (ta != null) ? ta.getUsername() : taId;
+                    String taMarker = "[TA:" + taId + "]";
+                    for (User admin : admins) {
+                        // Dedup: skip if an unread alert for this TA already exists
+                        boolean alreadyPending = notifDAO.findByUser(admin.getUserId()).stream()
+                                .anyMatch(n -> Notification.TYPE_WORKLOAD_ALERT.equals(n.getType())
+                                        && !n.isRead()
+                                        && n.getMessage().contains(taMarker));
+                        if (alreadyPending) continue;
+                        notifDAO.save(new Notification(
+                                notifDAO.generateNextId(),
+                                admin.getUserId(),
+                                Notification.TYPE_WORKLOAD_ALERT,
+                                "Workload alert " + taMarker + ": " + taName
+                                        + " has " + estimatedHours + "h"
+                                        + " (limit " + AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS + "h).",
+                                false,
+                                today
+                        ));
+                    }
+                }
             }
         }
 

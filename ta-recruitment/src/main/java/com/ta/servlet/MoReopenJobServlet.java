@@ -16,11 +16,23 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * MO re-opens a CLOSED job when it still has unfilled vacancies and the deadline has not passed
- * (e.g. after reducing accepted count manually).
+ * Servlet allowing a Module Organiser to re-open a CLOSED job when vacancies remain and the deadline has not passed.
+ * <p>
+ * URL mapping: {@code /mo/reopen-job} (declared in {@code WEB-INF/web.xml}).
+ * Typical use case: after reducing accepted count manually, the job can accept new applicants again.
+ * </p>
  */
 public class MoReopenJobServlet extends HttpServlet {
 
+    /**
+     * Validates reopen preconditions and sets the job status to {@code OPEN}.
+     *
+     * @param req  the HTTP POST request with {@code jobId} and optional {@code returnTo}
+     *             ({@code jobs} or applicants page)
+     * @param resp the HTTP response; redirects to jobs or applicants page with success or error flags
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

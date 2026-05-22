@@ -10,9 +10,23 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.io.File;
 
+/**
+ * Application startup listener that prepares the data directory and seeds sample CSV data
+ * when the web application context is initialized.
+ * <p>
+ * Registered via {@link WebListener} and runs once per deployment before servlets handle traffic.
+ * Creates {@code users.csv}, {@code jobs.csv}, {@code profiles.csv}, and {@code applications.csv}
+ * with demo records if missing or empty.
+ * </p>
+ */
 @WebListener
 public class AppInitializer implements ServletContextListener {
 
+    /**
+     * Resolves the data directory, creates upload folders, and seeds default CSV files if needed.
+     *
+     * @param sce the servlet context event supplied on application startup
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         String realPath = sce.getServletContext().getRealPath("/");
@@ -44,15 +58,15 @@ public class AppInitializer implements ServletContextListener {
         if (!jobsFile.exists() || jobsFile.length() == 0) {
             System.out.println("[INIT] Creating jobs.csv with sample data...");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
-                "J001,U002,\"EBU6304 Software Engineering\",\"Assist with lab sessions and marking\",\"Java programming; Git experience\",2,2026-04-30,OPEN,2026-03-20");
+                "J001,U002,\"EBU6304\",\"EBU6304 Software Engineering\",\"Teaching Assistant - Software Engineering\",\"Assist with lab sessions and marking\",\"Java programming; Git experience\",2,2026-04-30,\"Spring 2026\",\"Support lab sessions and marking\",\"Open to students with solid Java and teamwork skills\",OPEN,2026-03-20");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
-                "J002,U002,\"EBU5476 Computer Networks\",\"Help with tutorials and invigilation\",\"Networking knowledge; Good communication\",1,2026-04-15,OPEN,2026-03-20");
+                "J002,U002,\"EBU5476\",\"EBU5476 Computer Networks\",\"Teaching Assistant - Computer Networks\",\"Help with tutorials and invigilation\",\"Networking knowledge; Good communication\",1,2026-04-15,\"Spring 2026\",\"Support tutorials and invigilation\",\"Open to students with networking background and communication skills\",OPEN,2026-03-20");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
-                "J003,U002,\"EBU6305 Data Mining\",\"Support practical sessions on data analysis\",\"Python; Machine learning basics\",3,2026-05-10,OPEN,2026-03-25");
+                "J003,U002,\"EBU6305\",\"EBU6305 Data Mining\",\"Teaching Assistant - Data Mining\",\"Support practical sessions on data analysis\",\"Python; Machine learning basics\",3,2026-05-10,\"Spring 2026\",\"Support practical data analysis sessions\",\"Open to students familiar with Python and machine learning basics\",OPEN,2026-03-25");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
-                "J004,U005,\"EBU5302 Operating Systems\",\"Lab assistance and exam invigilation\",\"C programming; Linux experience\",2,2026-04-20,OPEN,2026-03-22");
+                "J004,U005,\"EBU5302\",\"EBU5302 Operating Systems\",\"Teaching Assistant - Operating Systems\",\"Lab assistance and exam invigilation\",\"C programming; Linux experience\",2,2026-04-20,\"Spring 2026\",\"Assist labs and invigilation\",\"Open to students with C and Linux experience\",OPEN,2026-03-22");
             FileManager.appendRow(jobsFile.getPath(), Job.CSV_HEADER,
-                "J005,U002,\"EBU6303 Internet of Things\",\"Assist with IoT lab setup and demos\",\"Arduino; Raspberry Pi; Sensor networks\",1,2026-03-15,CLOSED,2026-02-20");
+                "J005,U002,\"EBU6303\",\"EBU6303 Internet of Things\",\"Teaching Assistant - Internet of Things\",\"Assist with IoT lab setup and demos\",\"Arduino; Raspberry Pi; Sensor networks\",1,2026-03-15,\"Spring 2026\",\"Assist IoT lab setup and demos\",\"Open to students with hands-on IoT experience\",CLOSED,2026-02-20");
         }
 
         // ===== profiles.csv =====
@@ -82,6 +96,11 @@ public class AppInitializer implements ServletContextListener {
         System.out.println("[INIT] Data directory ready: " + dataDir);
     }
 
+    /**
+     * Called when the servlet context is destroyed. No teardown actions are performed.
+     *
+     * @param sce the servlet context event supplied on application shutdown
+     */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {}
 }

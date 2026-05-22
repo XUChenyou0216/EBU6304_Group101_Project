@@ -22,14 +22,33 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Serves CV files with inline (preview) or attachment (download) disposition.
- * action=own — TA views own CV; action=applicant — MO views an applicant for a job they own.
+ * Servlet that serves CV files from the uploads directory with appropriate content disposition.
+ * <p>
+ * URL mapping: {@code /cv/serve} via {@link WebServlet}.
+ * </p>
+ * <ul>
+ *   <li>{@code action=own} — TA views their own CV</li>
+ *   <li>{@code action=applicant} — MO views an applicant's CV for a job they own
+ *       (requires {@code jobId} and {@code taUserId})</li>
+ * </ul>
+ * Optional query parameter {@code disposition=attachment} forces download instead of inline preview.
+ *
+ * @see CvMimeUtil
  */
 @WebServlet("/cv/serve")
 public class CvServeServlet extends HttpServlet {
 
     private static final int BUFFER = 8192;
 
+    /**
+     * Streams the requested CV file after authorization and path-safety checks.
+     *
+     * @param req  the HTTP request with {@code action}, optional {@code jobId},
+     *             {@code taUserId}, and {@code disposition}
+     * @param resp the HTTP response with appropriate {@code Content-Type} and {@code Content-Disposition}
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if reading the file or writing the response fails
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

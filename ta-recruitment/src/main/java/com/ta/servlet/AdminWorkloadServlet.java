@@ -26,8 +26,14 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * US-A01: Admin view of TA workload — aggregate ACCEPTED applications per TA.
- * Hours estimate and limit align with admin dashboard workload section.
+ * Admin servlet for US-A01: aggregated view of TA workload based on accepted applications.
+ * <p>
+ * URL mapping: {@code /admin/workload} via {@link WebServlet}.
+ * Hours estimate and limit align with the admin dashboard workload section.
+ * </p>
+ *
+ * @see AdminWorkloadServlet#HOURS_PER_ACCEPTED_ASSIGNMENT
+ * @see AdminWorkloadServlet#WORKLOAD_LIMIT_HOURS
  */
 @WebServlet("/admin/workload")
 public class AdminWorkloadServlet extends HttpServlet {
@@ -37,6 +43,9 @@ public class AdminWorkloadServlet extends HttpServlet {
     /** Maximum recommended total hours before a TA is flagged (same as dashboard.jsp). */
     public static final int WORKLOAD_LIMIT_HOURS = 48;
 
+    /**
+     * View model row representing one TA's workload summary for the admin workload table.
+     */
     public static class TaWorkloadRow implements Serializable {
         private final String userId;
         private final String username;
@@ -46,6 +55,17 @@ public class AdminWorkloadServlet extends HttpServlet {
         private final int estimatedHours;
         private final boolean exceeded;
 
+        /**
+         * Constructs a workload summary row for display.
+         *
+         * @param userId          the TA user identifier
+         * @param username        the TA login username
+         * @param displayName     the TA full name or username fallback
+         * @param acceptedCount   number of accepted applications
+         * @param modulesSummary  comma-separated module labels for accepted jobs
+         * @param estimatedHours  estimated total hours ({@code acceptedCount * HOURS_PER_ACCEPTED_ASSIGNMENT})
+         * @param exceeded        {@code true} if {@code estimatedHours} exceeds {@link #WORKLOAD_LIMIT_HOURS}
+         */
         public TaWorkloadRow(String userId, String username, String displayName,
                              int acceptedCount, String modulesSummary,
                              int estimatedHours, boolean exceeded) {
@@ -58,15 +78,30 @@ public class AdminWorkloadServlet extends HttpServlet {
             this.exceeded = exceeded;
         }
 
+        /** @return the TA user identifier */
         public String getUserId() { return userId; }
+        /** @return the TA login username */
         public String getUsername() { return username; }
+        /** @return the display name shown in the UI */
         public String getDisplayName() { return displayName; }
+        /** @return the number of accepted assignments */
         public int getAcceptedCount() { return acceptedCount; }
+        /** @return a summary of module codes/names for accepted jobs */
         public String getModulesSummary() { return modulesSummary; }
+        /** @return estimated workload hours for this TA */
         public int getEstimatedHours() { return estimatedHours; }
+        /** @return whether estimated hours exceed the configured limit */
         public boolean isExceeded() { return exceeded; }
     }
 
+    /**
+     * Builds workload rows for all TAs and forwards to the admin workload JSP.
+     *
+     * @param req  the HTTP request
+     * @param resp the HTTP response; forwards to {@code /admin/workload.jsp} on success
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding or sending a forbidden error fails
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

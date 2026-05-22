@@ -29,6 +29,14 @@ import java.util.*;
 @WebServlet(urlPatterns = {"/admin/exportAllocation"})
 public class ExportAllocationServlet extends HttpServlet {
 
+    /**
+     * Generates and downloads a CSV of all accepted TA allocations joined with job metadata.
+     *
+     * @param request  the HTTP GET request; caller must be an authenticated admin
+     * @param response the HTTP response streamed as {@code text/csv} attachment
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if reading CSV files or writing the response fails
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

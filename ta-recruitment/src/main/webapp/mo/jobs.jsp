@@ -35,6 +35,15 @@
     <% if ("updated".equals(request.getParameter("success"))) { %>
         <div class="alert alert-success">Job updated successfully!</div>
     <% } %>
+    <% if ("closed".equals(request.getParameter("success"))) { %>
+        <div class="alert alert-success">Job closed successfully. This position is no longer accepting applications.</div>
+    <% } %>
+    <% if ("filled".equals(request.getParameter("error"))) { %>
+        <div class="alert alert-error">This job has already been filled and does not need to be closed manually.</div>
+    <% } %>
+    <% if ("alreadyclosed".equals(request.getParameter("error"))) { %>
+        <div class="alert alert-error">This job is already closed.</div>
+    <% } %>
     <% if ("closedFull".equals(request.getParameter("success"))) {
         String n = request.getParameter("n");
         int k = 0;
@@ -98,6 +107,7 @@
                         boolean past = JobDeadlineUtil.isPastDeadline(job.getDeadline());
                         boolean open = "OPEN".equals(job.getStatus());
                         long acceptedCnt = appDAO.countAcceptedForJob(job.getJobId());
+                        boolean canClose = open && acceptedCnt < job.getVacancies();
                         boolean canReopen = "CLOSED".equals(job.getStatus()) && !past && job.getVacancies() > 0
                             && acceptedCnt < job.getVacancies();
                         String statusBadgeClass;
@@ -124,6 +134,13 @@
                         <td style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
                             <a href="${pageContext.request.contextPath}/mo/applicants.jsp?jobId=<%= job.getJobId() %>" class="btn btn-primary btn-sm" style="border-radius:20px;padding:6px 16px;">View</a>
                             <a href="${pageContext.request.contextPath}/mo/edit-job?jobId=<%= job.getJobId() %>" class="btn btn-secondary btn-sm" style="border-radius:20px;padding:6px 16px;">Edit</a>
+                            <% if (canClose) { %>
+                            <form action="${pageContext.request.contextPath}/mo/post-job" method="post" style="margin:0;" onsubmit="return confirm('Close this job and stop accepting new applications?');">
+                                <input type="hidden" name="jobId" value="<%= job.getJobId() %>">
+                                <input type="hidden" name="action" value="close">
+                                <button type="submit" class="btn btn-danger btn-sm" style="border-radius:20px;padding:6px 16px;">Close</button>
+                            </form>
+                            <% } %>
                             <% if (canReopen) { %>
                             <form action="${pageContext.request.contextPath}/mo/reopen-job" method="post" style="margin:0;display:inline;">
                                 <input type="hidden" name="jobId" value="<%= job.getJobId() %>">

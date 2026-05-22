@@ -28,6 +28,22 @@
         .role-pill.ta { background: #eef1fb; color: #2b4acb; } .role-pill.mo { background: #fef3c7; color: #b45309; } .role-pill.admin { background: #f3e8ff; color: #7c3aed; }
         .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; margin-right: 16px; }
         .status-pill.active { background: #ecfdf5; color: #16a34a; } .status-pill.suspended { background: #fef2f2; color: #dc2626; } .status-pill.inactive { background: #f3f4f6; color: #6b7280; }
+        .btn-outline-green { background: transparent; color: #16a34a; border: 1px solid #16a34a; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; }
+        .btn-outline-amber { background: transparent; color: #d97706; border: 1px solid #d97706; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; }
+        .btn-outline-red { background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; }
+        .badge-status-active { background: #ecfdf5; color: #16a34a; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .badge-status-suspended { background: #fef2f2; color: #dc2626; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .badge-status-pending { background: #fff7ed; color: #d97706; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+        .col-actions {
+                flex: 0 0 180px !important;
+                display: flex !important;
+                justify-content: flex-start !important;
+            }
+        .action-form {
+                display: flex !important;
+                gap: 5px !important; /* 按钮之间的间距 */
+                align-items: center;
+            }
         .col-role { width: 140px; } .col-status { width: 100px; } .col-actions { width: 40px; text-align: right; }
     </style>
 </head>
@@ -110,17 +126,17 @@
             <div class="col-role"><span class="role-pill <%= rc %>"><%= rl %></span></div>
             <div class="col-status"><span class="status-pill <%= sc %>"><%= u.getStatus() %></span></div>
             <div class="col-actions">
-                <form action="${pageContext.request.contextPath}/admin/users" method="post" style="display:inline;">
+                <form action="${pageContext.request.contextPath}/admin/users" method="post" class="action-form">
                     <input type="hidden" name="userId" value="<%= u.getUserId() %>">
+
                     <% if ("ACTIVE".equalsIgnoreCase(u.getStatus())) { %>
-                        <button type="submit" name="action" value="suspend" class="btn btn-ghost btn-sm" title="Suspend">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
-                        </button>
+                        <button type="submit" name="action" value="suspend" class="btn-outline-amber">Suspend</button>
                     <% } else { %>
-                        <button type="submit" name="action" value="activate" class="btn btn-ghost btn-sm" title="Activate">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        </button>
+                        <button type="submit" name="action" value="activate" class="btn-outline-green">Reactivate</button>
                     <% } %>
+
+                    <button type="submit" name="action" value="delete" class="btn-outline-red"
+                            onclick="return confirm('Delete this user permanently?')">Delete</button>
                 </form>
             </div>
         </div>

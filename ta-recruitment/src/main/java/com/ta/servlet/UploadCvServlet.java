@@ -4,6 +4,7 @@ import com.ta.dao.TAProfileDAO;
 import com.ta.model.TAProfile;
 import com.ta.model.User;
 import com.ta.util.SessionUtil;
+import com.ta.util.Validator;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -19,10 +20,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+/**
+ * Servlet for Teaching Assistants to upload a CV file (multipart form).
+ * <p>
+ * URL mapping: {@code /ta/upload-cv} via {@link WebServlet}.
+ * Maximum upload size is 11 MB. Accepted formats are validated by {@link Validator#validateCvFile}.
+ * </p>
+ */
 @WebServlet("/ta/upload-cv")
 @MultipartConfig(maxFileSize = 11 * 1024 * 1024)
 public class UploadCvServlet extends HttpServlet {
 
+    /**
+     * Receives a CV file upload, stores it under {@code uploads/}, and updates the TA profile path.
+     *
+     * @param req  the HTTP multipart request with part name {@code cvFile}
+     * @param resp the HTTP response; redirects to profile JSP with success or error query parameters
+     * @throws ServletException if multipart parsing fails
+     * @throws IOException      if file I/O or redirect fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = SessionUtil.getCurrentUser(req);
@@ -37,12 +53,7 @@ public class UploadCvServlet extends HttpServlet {
             return;
         }
 
-        // 1. 强制 10MB 限制
-        if (part.getSize() > 10 * 1024 * 1024) {
-            resp.sendRedirect(req.getContextPath() + "/ta/profile.jsp?error=too_large");
-            return;
-        }
-
+        // 1. 解析原始文件名
         String submittedName = "";
         String contentDisp = part.getHeader("content-disposition");
         for (String token : contentDisp.split(";")) {
@@ -53,17 +64,20 @@ public class UploadCvServlet extends HttpServlet {
             }
         }
 
-        // 3. 校验后缀名 (只定义一次变量)
-        String ext = "";
-        if (submittedName.contains(".")) {
-            ext = submittedName.substring(submittedName.lastIndexOf(".")).toLowerCase();
-        }
-
-        String allowedExtensions = ".pdf.doc.docx.jpg.png";
-        if (ext.isEmpty() || !allowedExtensions.contains(ext)) {
-            resp.sendRedirect(req.getContextPath() + "/ta/profile.jsp?error=invalid_format");
+        // 2. 统一通过 Validator 校验格式与大小（与后端规范保持一致）
+        String validationError = Validator.validateCvFile(submittedName, part.getSize());
+        if (validationError != null) {
+            // 区分错误类型以便前端显示对应消息
+            if (validationError.contains("10MB") || validationError.contains("limit")) {
+                resp.sendRedirect(req.getContextPath() + "/ta/profile.jsp?error=too_large");
+            } else {
+                resp.sendRedirect(req.getContextPath() + "/ta/profile.jsp?error=invalid_format");
+            }
             return;
         }
+
+        // 3. 提取已验证的后缀名
+        String ext = submittedName.substring(submittedName.lastIndexOf(".")).toLowerCase();
 
         // 4. 准备存储路径
         String uploadsPath = req.getServletContext().getRealPath("/uploads");
