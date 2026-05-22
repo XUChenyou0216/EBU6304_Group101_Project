@@ -10,7 +10,35 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+
+/**
+ * Client for invoking large-language-model APIs configured via {@link ConfigDAO}.
+ * <p>
+ * Supports Anthropic ({@code claude-*}) and OpenAI-compatible endpoints. Provider, model,
+ * API key, and base URL are read from configuration keys {@code ai.provider},
+ * {@code ai.model}, {@code ai.api.key}, and {@code ai.base.url} respectively.
+ * Defaults to Anthropic with {@code claude-haiku-4-5-20251001} when not configured.
+ * </p>
+ */
 public class AIService {
+
+    /**
+     * Sends a user prompt to the configured AI provider and returns the model's text response.
+     * <p>
+     * When {@code ai.provider} is {@code "anthropic"} (the default), the Anthropic Messages API
+     * is used. For any other provider value, an OpenAI-compatible chat completions endpoint
+     * is called using {@code ai.base.url} (default {@code https://api.openai.com/v1}).
+     * </p>
+     *
+     * @param config the configuration accessor supplying API credentials and provider settings
+     * @param prompt the user message to send to the model
+     * @return the assistant's text response extracted from the API JSON payload
+     * @throws IOException          if the HTTP request fails or the API returns a non-200 status
+     * @throws InterruptedException if the HTTP client is interrupted while waiting for a response
+     */
+
+public class AIService {
+
 
     public static String call(ConfigDAO config, String prompt) throws IOException, InterruptedException {
         String provider = config.get("ai.provider");

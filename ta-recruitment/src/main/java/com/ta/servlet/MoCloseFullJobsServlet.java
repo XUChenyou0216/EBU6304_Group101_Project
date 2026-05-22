@@ -17,10 +17,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Sets all OPEN jobs that are at acceptance capacity to CLOSED (MO one-click housekeeping).
+ * Servlet that closes all OPEN jobs owned by the current MO that have reached acceptance capacity.
+ * <p>
+ * URL mapping: {@code /mo/close-full-jobs} (declared in {@code WEB-INF/web.xml}).
+ * One-click housekeeping from the MO jobs page.
+ * </p>
  */
 public class MoCloseFullJobsServlet extends HttpServlet {
 
+    /**
+     * Sets each full OPEN job owned by the MO to {@code CLOSED} and redirects with a count.
+     *
+     * @param req  the HTTP POST request from the MO jobs UI
+     * @param resp the HTTP response; redirects to {@code /mo/jobs.jsp?success=closedFull&n=<count>}
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

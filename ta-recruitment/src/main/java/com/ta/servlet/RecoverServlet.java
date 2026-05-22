@@ -8,9 +8,25 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+/**
+ * Servlet for password recovery using the user's security question answer.
+ * <p>
+ * URL mapping: {@code /recover} via {@link WebServlet}.
+ * </p>
+ *
+ * @see PasswordUtil
+ */
 @WebServlet("/recover")
 public class RecoverServlet extends HttpServlet {
 
+    /**
+     * Displays the password recovery form.
+     *
+     * @param req  the HTTP request
+     * @param resp the HTTP response; forwards to {@code /recover.jsp}
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding fails
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -18,6 +34,14 @@ public class RecoverServlet extends HttpServlet {
         req.getRequestDispatcher("/recover.jsp").forward(req, resp);
     }
 
+    /**
+     * Verifies the security answer and updates the user's password hash on success.
+     *
+     * @param req  the HTTP request with {@code username}, {@code securityAnswer}, and {@code newPassword}
+     * @param resp the HTTP response; forwards to recover JSP with error or success message
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

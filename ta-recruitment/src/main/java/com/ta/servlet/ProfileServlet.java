@@ -13,8 +13,26 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Servlet for Teaching Assistants to create or update their profile information.
+ * <p>
+ * URL mapping: {@code /ta/profile} via {@link WebServlet}.
+ * Handles POST submissions from the profile JSP form.
+ * </p>
+ *
+ * @see TAProfileDAO
+ */
 @WebServlet("/ta/profile")
 public class ProfileServlet extends HttpServlet {
+
+    /**
+     * Validates profile fields and persists the TA profile for the logged-in user.
+     *
+     * @param request  the HTTP request with studentId, fullName, programme, yearOfStudy, and phone
+     * @param response the HTTP response; forwards to profile JSP on validation error or redirects on success
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if redirecting or forwarding fails
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 设置编码防止中文乱码

@@ -21,13 +21,24 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 全量迭代测试脚本：Sprint 1 + Sprint 2 功能验证。
- * 使用方式：在 ta-recruitment 目录下运行 mvn -Dtest=FullIterationFeatureTest test
+ * Full-iteration feature verification covering Sprint 1 and Sprint 2 capabilities.
+ *
+ * <p>This test class exercises core domain flows end-to-end at the DAO and
+ * validation layer: user registration and password handling, role assignment,
+ * form validation, TA profile and CV rules, job browsing and posting, application
+ * submission and review, and a simulated historical CSV export.</p>
+ *
+ * <p>Run with: {@code mvn -Dtest=FullIterationFeatureTest test}</p>
  */
 public class FullIterationFeatureTest {
 
     private static final String DATA_DIR = "target/test-data";
 
+    /**
+     * Prepares a clean isolated CSV data directory before any tests in this class run.
+     *
+     * @throws IOException if the existing directory cannot be removed or recreated
+     */
     @BeforeClass
     public static void prepareTestDataDirectory() throws IOException {
         Path dataPath = Paths.get(DATA_DIR);
@@ -37,6 +48,11 @@ public class FullIterationFeatureTest {
         Files.createDirectories(dataPath);
     }
 
+    /**
+     * Optional post-class hook; test data is intentionally retained for manual inspection.
+     *
+     * @throws IOException declared for symmetry with setup; no cleanup is performed
+     */
     @AfterClass
     public static void cleanUp() throws IOException {
         // 保留测试数据目录，方便验收时查看结果
@@ -44,6 +60,10 @@ public class FullIterationFeatureTest {
 
     // ── Sprint 1 ──────────────────────────────────────────────────────────
 
+    /**
+     * Verifies registration-related behaviour: password hashing and verification,
+     * user persistence and lookup, and basic email/password validation rules.
+     */
     @Test
     public void testRegistrationLoginRecovery() {
         User user = new User("U100", "student_x", PasswordUtil.hash("pass123"),
@@ -71,6 +91,10 @@ public class FullIterationFeatureTest {
                 Validator.validatePassword("123"));
     }
 
+    /**
+     * Verifies that user model instances preserve the expected role values for
+     * TA, MO, and ADMIN accounts.
+     */
     @Test
     public void testRolePermissionHandling() {
         User taUser    = new User("U101", "ta_user",    "hash", "TA",    "ta@bupt.edu.cn",    "q", "a", "ACTIVE");
@@ -82,6 +106,10 @@ public class FullIterationFeatureTest {
         assertEquals("Admin user should have ADMIN role", "ADMIN", adminUser.getRole());
     }
 
+    /**
+     * Verifies {@link Validator} rules for usernames, emails, passwords, phone
+     * numbers, and job posting fields.
+     */
     @Test
     public void testFormValidation() {
         assertNotNull("Empty username should return error",
@@ -114,6 +142,10 @@ public class FullIterationFeatureTest {
 
     // ── Sprint 2 ──────────────────────────────────────────────────────────
 
+    /**
+     * Verifies TA profile field persistence expectations and CV upload validation
+     * for allowed and disallowed file types.
+     */
     @Test
     public void testTaProfileAndCvUpload() {
         TAProfile profile = new TAProfile("U104", "2024210001", "Zhang San",
@@ -133,6 +165,10 @@ public class FullIterationFeatureTest {
                 Validator.validateCvFile("cv.exe", 1024 * 100));
     }
 
+    /**
+     * Verifies that open jobs can be saved and retrieved, and that closed jobs
+     * are excluded from the open-job listing.
+     */
     @Test
     public void testTaBrowseJobs() {
         JobDAO jobDao = new JobDAO(DATA_DIR);
@@ -153,6 +189,10 @@ public class FullIterationFeatureTest {
                 openJobs.stream().anyMatch(job -> "J100".equals(job.getJobId())));
     }
 
+    /**
+     * Verifies TA application submission, duplicate-application detection, and
+     * status/review-note updates through {@link ApplicationDAO}.
+     */
     @Test
     public void testTaApplyAndStatusFlow() {
         ApplicationDAO appDao = new ApplicationDAO(DATA_DIR);
@@ -179,6 +219,10 @@ public class FullIterationFeatureTest {
                 "Waiting for MO feedback", loaded.getReviewNote());
     }
 
+    /**
+     * Verifies MO job creation, persistence, and subsequent editing of vacancies
+     * and description through {@link JobDAO}.
+     */
     @Test
     public void testMoPostAndEditJob() {
         JobDAO jobDao = new JobDAO(DATA_DIR);
@@ -204,6 +248,10 @@ public class FullIterationFeatureTest {
                 "Support research sessions and grading", updated.getDescription());
     }
 
+    /**
+     * Verifies the MO applicant review workflow: listing applications for a job
+     * and updating status and review notes to {@code ACCEPTED}.
+     */
     @Test
     public void testMoReviewApplicantWorkflow() {
         ApplicationDAO appDao = new ApplicationDAO(DATA_DIR);
@@ -223,6 +271,12 @@ public class FullIterationFeatureTest {
                 "Excellent fit", refreshed.getReviewNote());
     }
 
+    /**
+     * Simulates writing a historical user export CSV and verifies header and row
+     * round-trip integrity.
+     *
+     * @throws IOException if the export file cannot be written or read
+     */
     @Test
     public void testHistoricalExportSimulation() throws IOException {
         Path exportPath = Paths.get(DATA_DIR, "archive", "history_export.csv");
@@ -242,6 +296,12 @@ public class FullIterationFeatureTest {
 
     // ── Helper ────────────────────────────────────────────────────────────
 
+    /**
+     * Recursively deletes a directory tree used by {@link #prepareTestDataDirectory()}.
+     *
+     * @param path root path to delete
+     * @throws IOException if any file or directory cannot be removed
+     */
     private static void deleteRecursively(Path path) throws IOException {
         if (!Files.exists(path)) return;
         Files.walk(path)

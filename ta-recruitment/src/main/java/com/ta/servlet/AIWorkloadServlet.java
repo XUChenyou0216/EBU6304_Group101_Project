@@ -27,12 +27,29 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
+
+ * Admin servlet for US-A02: AI-assisted workload balancing and reassignment recommendations.
+ * <p>
+ * URL mapping: {@code /admin/ai-workload} via {@link WebServlet}.
+ * Separates anomaly detection (always shown) from redistribution recommendations
+ * (AI-powered when an API key is configured, rule-based otherwise).
+ * </p>
+ *
+ * @see AdminWorkloadServlet
+ * @see com.ta.util.AIService
+
  * US-A02: AI-assisted workload balancing.
  * Separates anomaly detection (always shown) from redistribution recommendations
  * (AI-powered when API key configured, rule-based otherwise).
+
  */
 @WebServlet("/admin/ai-workload")
 public class AIWorkloadServlet extends HttpServlet {
+
+
+    /**
+     * View model for a suggested transfer of one accepted application from an overloaded TA to another.
+     */
 
     public static class WorkloadRecommendation implements Serializable {
         private final String applicationId;
@@ -47,6 +64,24 @@ public class AIWorkloadServlet extends HttpServlet {
         private final int toNewHours;
         private final int confidence;
         private final String reasoning;
+
+
+        /**
+         * Constructs a workload redistribution recommendation for display and apply actions.
+         *
+         * @param applicationId    the application to reassign
+         * @param fromTaId         current TA user id
+         * @param fromTaName       display name of the source TA
+         * @param toTaId           target TA user id
+         * @param toTaName         display name of the target TA
+         * @param jobLabel         human-readable job/module label
+         * @param fromCurrentHours estimated hours before change for source TA
+         * @param fromNewHours     estimated hours after change for source TA
+         * @param toCurrentHours   estimated hours before change for target TA
+         * @param toNewHours       estimated hours after change for target TA
+         * @param confidence       recommendation confidence score (0–100)
+         * @param reasoning        explanation text from AI or rule engine
+         */
 
         public WorkloadRecommendation(String applicationId,
                 String fromTaId, String fromTaName,
@@ -69,6 +104,42 @@ public class AIWorkloadServlet extends HttpServlet {
             this.reasoning        = reasoning;
         }
 
+
+        /** @return the application identifier to reassign */
+        public String getApplicationId()  { return applicationId; }
+        /** @return the source TA user id */
+        public String getFromTaId()       { return fromTaId; }
+        /** @return the source TA display name */
+        public String getFromTaName()     { return fromTaName; }
+        /** @return the target TA user id */
+        public String getToTaId()         { return toTaId; }
+        /** @return the target TA display name */
+        public String getToTaName()       { return toTaName; }
+        /** @return the job/module label for this assignment */
+        public String getJobLabel()       { return jobLabel; }
+        /** @return estimated hours for the source TA before reassignment */
+        public int getFromCurrentHours()  { return fromCurrentHours; }
+        /** @return estimated hours for the source TA after reassignment */
+        public int getFromNewHours()      { return fromNewHours; }
+        /** @return estimated hours for the target TA before reassignment */
+        public int getToCurrentHours()    { return toCurrentHours; }
+        /** @return estimated hours for the target TA after reassignment */
+        public int getToNewHours()        { return toNewHours; }
+        /** @return confidence score for this recommendation */
+        public int getConfidence()        { return confidence; }
+        /** @return human-readable reasoning for the suggestion */
+        public String getReasoning()      { return reasoning; }
+    }
+
+    /**
+     * Computes overloaded TA rows and redistribution recommendations, then forwards to the AI workload JSP.
+     *
+     * @param req  the HTTP request
+     * @param resp the HTTP response; forwards to {@code /admin/ai-workload.jsp} on success
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding or sending forbidden fails
+     */
+
         public String getApplicationId()  { return applicationId; }
         public String getFromTaId()       { return fromTaId; }
         public String getFromTaName()     { return fromTaName; }
@@ -82,6 +153,7 @@ public class AIWorkloadServlet extends HttpServlet {
         public int getConfidence()        { return confidence; }
         public String getReasoning()      { return reasoning; }
     }
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -170,6 +242,17 @@ public class AIWorkloadServlet extends HttpServlet {
         req.setAttribute("workloadLimitHours", AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS);
         req.getRequestDispatcher("/admin/ai-workload.jsp").forward(req, resp);
     }
+
+
+    /**
+     * Applies an admin-approved reassignment by updating the application's TA and review note.
+     *
+     * @param req  the HTTP POST request with {@code applicationId}, {@code newTaId},
+     *             and optional {@code fromTaId}
+     * @param resp the HTTP response; redirects to AI workload page with success or error flags
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)

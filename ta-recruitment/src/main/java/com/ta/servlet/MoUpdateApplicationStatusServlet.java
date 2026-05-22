@@ -21,11 +21,24 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 
 /**
- * MO updates a single application status (Applicants & Review table).
+ * Servlet for a Module Organiser to update a single application status from the applicants or progress UI.
+ * <p>
+ * URL mapping: {@code /mo/update-status} via {@link WebServlet}.
+ * Enforces vacancy capacity, notifies the TA, and may alert admins on workload overrun.
+ * </p>
  */
 @WebServlet("/mo/update-status")
 public class MoUpdateApplicationStatusServlet extends HttpServlet {
 
+    /**
+     * Updates one application's status and optional review note, then redirects based on {@code returnTo}.
+     *
+     * @param req  the HTTP POST request with {@code applicationId}, {@code newStatus},
+     *             optional {@code reviewNote}, {@code jobId}, and {@code returnTo}
+     * @param resp the HTTP response; redirects to applicants or progress page with result query flags
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

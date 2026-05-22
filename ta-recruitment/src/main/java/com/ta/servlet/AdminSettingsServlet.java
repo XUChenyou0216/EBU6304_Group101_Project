@@ -10,7 +10,29 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+
+/**
+ * Servlet for administrators to view and update system configuration, especially AI integration settings.
+ * <p>
+ * URL mapping: {@code /admin/settings} (declared in {@code WEB-INF/web.xml}).
+ * Access is restricted to users with the {@code ADMIN} role via session checks.
+ * </p>
+ *
+ * @see ConfigDAO
+ */
 public class AdminSettingsServlet extends HttpServlet {
+
+    /**
+     * Displays the admin settings page with current AI provider, model, base URL, and a masked API key.
+     *
+     * @param req  the HTTP request; may include query parameter {@code saved=1} after a successful save
+     * @param resp the HTTP response; forwards to {@code /admin/settings.jsp} on success
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding or sending an error response fails
+     */
+
+public class AdminSettingsServlet extends HttpServlet {
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -39,6 +61,18 @@ public class AdminSettingsServlet extends HttpServlet {
 
         req.getRequestDispatcher("/admin/settings.jsp").forward(req, resp);
     }
+
+
+    /**
+     * Persists AI configuration submitted from the settings form.
+     * The API key is only overwritten when a non-empty value without placeholder masking is supplied.
+     *
+     * @param req  the HTTP request with form fields {@code ai.provider}, {@code ai.api.key},
+     *             {@code ai.model}, and {@code ai.base.url}
+     * @param resp the HTTP response; redirects to {@code /admin/settings?saved=1} on success
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending an error response fails
+     */
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)

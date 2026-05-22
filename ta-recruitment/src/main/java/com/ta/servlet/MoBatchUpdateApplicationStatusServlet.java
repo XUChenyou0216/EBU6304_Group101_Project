@@ -26,12 +26,28 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Batch update application statuses from the MO applicants page.
- * POST {@code batchPayload}: {@code APP001,ACCEPTED;APP002,UNDER_REVIEW;...}
- * Optional {@code includeNotes=true} with {@code note_&lt;applicationId&gt;} for rows in the payload.
+ * Servlet for batch updating application statuses from the MO applicants review page.
+ * <p>
+ * URL mapping: {@code /mo/batch-update-applications} (declared in {@code WEB-INF/web.xml}).
+ * </p>
+ * <p>
+ * POST parameter {@code batchPayload}: semicolon-separated entries such as
+ * {@code APP001,ACCEPTED;APP002,UNDER_REVIEW;...}.
+ * Optional {@code includeNotes=true} with {@code note_&lt;applicationId&gt;} per row in the payload.
+ * Sends TA status notifications and admin workload alerts when applicable.
+ * </p>
  */
 public class MoBatchUpdateApplicationStatusServlet extends HttpServlet {
 
+    /**
+     * Applies status (and optional review note) updates for all operations in the batch payload.
+     *
+     * @param req  the HTTP POST request with {@code batchPayload}, optional {@code jobId},
+     *             {@code includeNotes}, and per-application {@code note_<applicationId>} fields
+     * @param resp the HTTP response; redirects to applicants page with success, error, or capacity warning
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

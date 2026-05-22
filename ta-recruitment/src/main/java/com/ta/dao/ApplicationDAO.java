@@ -9,11 +9,28 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Data access object for TA {@link Application} records in {@code applications.csv}.
+ * <p>
+ * Supports querying by applicant, job, and status; enforces vacancy caps when
+ * accepting applications; and provides bulk persistence for batch updates.
+ * </p>
+ */
 public class ApplicationDAO {
     private final String filePath;
 
+    /**
+     * Creates a DAO that reads and writes applications from {@code dataDir/applications.csv}.
+     *
+     * @param dataDir base directory containing CSV data files
+     */
     public ApplicationDAO(String dataDir) { this.filePath = dataDir + "/applications.csv"; }
 
+    /**
+     * Loads every valid application row from the backing CSV file.
+     *
+     * @return list of {@link Application} instances; never {@code null} (may be empty)
+     */
     public List<Application> findAll() {
         List<Application> apps = new ArrayList<>();
         for (String row : FileManager.readAll(filePath)) {
@@ -23,6 +40,12 @@ public class ApplicationDAO {
         return apps;
     }
 
+    /**
+     * Finds a single application by its unique application id.
+     *
+     * @param applicationId the application identifier
+     * @return the matching {@link Application}, or {@code null} if not found
+     */
     public Application findById(String applicationId) {
         for (Application a : findAll()) {
             if (a.getApplicationId().equals(applicationId)) return a;
@@ -30,17 +53,34 @@ public class ApplicationDAO {
         return null;
     }
 
+    /**
+     * Returns all applications submitted by the given teaching assistant.
+     *
+     * @param taUserId the TA's user id
+     * @return applications where {@link Application#getTaUserId()} equals {@code taUserId}; never {@code null}
+     */
     public List<Application> findByTa(String taUserId) {
         return findAll().stream().filter(a -> a.getTaUserId().equals(taUserId)).collect(Collectors.toList());
     }
 
+    /**
+     * Returns all applications for a specific job posting.
+     *
+     * @param jobId the job id to filter on (may be {@code null}, in which case no rows match)
+     * @return applications for that job; never {@code null}
+     */
     public List<Application> findByJob(String jobId) {
         return findAll().stream()
                 .filter(a -> Objects.equals(a.getJobId(), jobId))
                 .collect(Collectors.toList());
     }
 
-    /** Number of applications already marked {@code ACCEPTED} for this job. */
+    /**
+     * Counts how many applications for the given job already have status {@code ACCEPTED}.
+     *
+     * @param jobId the job id; if {@code null}, returns {@code 0}
+     * @return number of accepted applications for that job
+     */
     public long countAcceptedForJob(String jobId) {
         if (jobId == null) {
             return 0;
@@ -49,8 +89,18 @@ public class ApplicationDAO {
     }
 
     /**
-     * Whether setting {@code newStatusUpper} to ACCEPTED would exceed {@link Job#getVacancies()}.
-     * Does not block: non-ACCEPTED targets, or rows already ACCEPTED (e.g. editing review note only).
+     * Determines whether changing an application's status to {@code ACCEPTED} would exceed
+     * the job's vacancy limit defined by {@link Job#getVacancies()}.
+     * <p>
+     * Returns {@code false} when: {@code job}, {@code app}, or {@code newStatusUpper} is
+     * {@code null}; the target status is not {@code ACCEPTED}; or the application is already
+     * {@code ACCEPTED} (for example when only updating a review note).
+     * </p>
+     *
+     * @param job            the job posting with vacancy count
+     * @param app            the application being updated
+     * @param newStatusUpper proposed status in upper case (for example {@code ACCEPTED})
+     * @return {@code true} if accepting would meet or exceed the cap; {@code false} otherwise
      */
     public boolean isAcceptanceCapExceeded(Job job, Application app, String newStatusUpper) {
         if (job == null || app == null || newStatusUpper == null) {
@@ -70,8 +120,15 @@ public class ApplicationDAO {
     }
 
     /**
-     * All applications for the given job ids, newest {@link Application#getAppliedDate()} first
-     * (ISO dates sort lexicographically). Ties broken by applicationId descending.
+     * Returns applications whose job id is in the given set, sorted by applied date
+     * descending (newest first).
+     * <p>
+     * ISO date strings sort lexicographically. When applied dates tie, application ids
+     * are compared in descending order.
+     * </p>
+     *
+     * @param jobIds set of job ids to include; {@code null} or empty yields an empty list
+     * @return sorted list of matching applications; never {@code null}
      */
     public List<Application> findByJobIdsSortedByAppliedDateDesc(Set<String> jobIds) {
         if (jobIds == null || jobIds.isEmpty()) {
@@ -94,15 +151,35 @@ public class ApplicationDAO {
         return list;
     }
 
+    /**
+     * Checks whether the given TA has already applied to the specified job.
+     *
+     * @param taUserId the teaching assistant's user id
+     * @param jobId    the job id
+     * @return {@code true} if at least one application exists for that TA–job pair
+     */
     public boolean hasApplied(String taUserId, String jobId) {
         return findAll().stream()
                 .anyMatch(a -> Objects.equals(a.getTaUserId(), taUserId) && Objects.equals(a.getJobId(), jobId));
     }
 
+    /**
+     * Appends an application row; the caller must set {@link Application#getApplicationId()}
+     * before calling.
+     *
+     * @param app the application to persist
+     */
     public void save(Application app) {
         FileManager.appendRow(filePath, Application.CSV_HEADER, app.toCsvRow());
     }
 
+
+    /**
+     * Appends an application and assigns the next id with prefix {@code APP}.
+     *
+     * @param app the application to save; updated in memory with the new id on success
+     * @return the generated application id, or {@code null} if append failed
+     */
     public String saveWithNextId(Application app) {
         String generatedId = FileManager.appendWithGeneratedId(filePath, Application.CSV_HEADER, "APP", id -> {
             app.setApplicationId(id);
@@ -113,6 +190,16 @@ public class ApplicationDAO {
         }
         return generatedId;
     }
+
+    /**
+     * Appends an application only if the TA has not already applied to the same job.
+     * <p>
+     * On success, assigns the next id with prefix {@code APP} via {@link FileManager#nextId}.
+     * </p>
+     *
+     * @param app the application to insert
+     * @return {@code true} if written; {@code false} if a duplicate TA–job application exists
+     */
 
     public boolean saveIfNotApplied(Application app) {
         return FileManager.appendIfAbsent(
@@ -132,6 +219,14 @@ public class ApplicationDAO {
         );
     }
 
+
+    /**
+     * Replaces the CSV row whose application id matches {@link Application#getApplicationId()}
+     * on the given object.
+     *
+     * @param updated application with new field values
+     */
+
     public void update(Application updated) {
         FileManager.updateRows(filePath, Application.CSV_HEADER, rows -> {
             List<String> newRows = new ArrayList<>();
@@ -145,7 +240,12 @@ public class ApplicationDAO {
         });
     }
 
-    /** Replace the entire applications file in one write (same row order as {@code applications}). */
+    /**
+     * Replaces the entire applications CSV in one write, preserving the order of the
+     * supplied list.
+     *
+     * @param applications complete list of applications to write; must not be {@code null}
+     */
     public void persistAll(List<Application> applications) {
         List<String> rows = new ArrayList<>(applications.size());
         for (Application a : applications) {
@@ -154,6 +254,11 @@ public class ApplicationDAO {
         FileManager.writeAll(filePath, Application.CSV_HEADER, rows);
     }
 
+    /**
+     * Computes the next available application id with prefix {@code APP} without persisting.
+     *
+     * @return the next id string (for example {@code APP001})
+     */
     public String generateNextId() {
         return FileManager.generateNextId(filePath, "APP");
     }

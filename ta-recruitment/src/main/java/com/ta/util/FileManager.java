@@ -14,8 +14,61 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * Thread-safe utility for reading and writing CSV data files on disk.
+ * <p>
+ * All file operations acquire both a JVM-level {@link ReentrantLock} and an OS-level
+ * {@link FileLock} to prevent concurrent corruption when multiple threads or processes
+ * access the same file. CSV files are expected to have a header row followed by data rows;
+ * the header is managed by callers and is not included in row lists returned by read methods.
+ * </p>
+ */
 public class FileManager {
     private static final ConcurrentHashMap<String, ReentrantLock> FILE_LOCKS = new ConcurrentHashMap<>();
+
+
+    /**
+     * Functional interface for constructing a new CSV row when a generated identifier is available.
+     *
+     * @see #appendWithGeneratedId(String, String, String, RowFactory)
+     */
+    @FunctionalInterface
+    public interface RowFactory {
+        /**
+         * Creates a CSV row string using the supplied generated identifier.
+         *
+         * @param generatedId the newly allocated row identifier (e.g. {@code "APP001"})
+         * @return the complete CSV row to append, without a trailing line separator
+         */
+        String create(String generatedId);
+    }
+
+    /**
+     * Functional interface for transforming the full list of CSV data rows in place.
+     *
+     * @see #updateRows(String, String, RowTransformer)
+     */
+    @FunctionalInterface
+    public interface RowTransformer {
+        /**
+         * Transforms the current list of CSV data rows.
+         *
+         * @param rows a mutable copy of all data rows (header excluded); may be modified or replaced
+         * @return the list of rows to persist back to the file
+         */
+        List<String> transform(List<String> rows);
+    }
+
+    /**
+     * Reads all data rows from a CSV file, excluding the header row.
+     * <p>
+     * If the file does not exist, an empty list is returned. I/O errors are logged to
+     * standard error and also result in an empty list.
+     * </p>
+     *
+     * @param filePath absolute or relative path to the CSV file
+     * @return a list of data row strings (never {@code null}); empty if the file is missing or unreadable
+     */
 
     @FunctionalInterface
     public interface RowFactory {
@@ -27,6 +80,7 @@ public class FileManager {
         List<String> transform(List<String> rows);
     }
 
+
     public static List<String> readAll(String filePath) {
         File file = new File(filePath);
         if (!file.exists()) return new ArrayList<>();
@@ -37,6 +91,19 @@ public class FileManager {
             return new ArrayList<>();
         }
     }
+
+
+    /**
+     * Appends a single data row to the end of a CSV file.
+     * <p>
+     * If the file is empty, the supplied header is written first, followed by the row.
+     * A platform line separator is appended after the row.
+     * </p>
+     *
+     * @param filePath   path to the CSV file (created if absent, along with parent directories)
+     * @param csvHeader  the header line to write when the file is new or empty
+     * @param row        the data row to append (without trailing line separator)
+     */
 
     public static void appendRow(String filePath, String csvHeader, String row) {
         try {
@@ -50,6 +117,18 @@ public class FileManager {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
+
+    /**
+     * Replaces the entire contents of a CSV file with a new header and data rows.
+     * <p>
+     * Any existing content is truncated before writing. I/O errors are logged to standard error.
+     * </p>
+     *
+     * @param filePath   path to the CSV file
+     * @param csvHeader  the header line to write as the first line
+     * @param rows       the complete list of data rows to persist (header excluded)
+     */
+
     public static void writeAll(String filePath, String csvHeader, List<String> rows) {
         try {
             withLockedFile(filePath, true, (raf, channel) -> {
@@ -58,6 +137,18 @@ public class FileManager {
             });
         } catch (IOException e) { e.printStackTrace(); }
     }
+
+
+    /**
+     * Reads existing rows, generates the next sequential identifier, appends a new row,
+     * and rewrites the file atomically under lock.
+     *
+     * @param filePath   path to the CSV file
+     * @param csvHeader  the header line used when rewriting the file
+     * @param prefix     identifier prefix used by {@link #nextId(List, String)} (e.g. {@code "APP"})
+     * @param rowFactory callback that builds the new row from the generated identifier
+     * @return the generated identifier on success, or {@code null} if an I/O error occurs
+     */
 
     public static String appendWithGeneratedId(String filePath, String csvHeader, String prefix, RowFactory rowFactory) {
         try {
@@ -73,6 +164,22 @@ public class FileManager {
             return null;
         }
     }
+
+
+    /**
+     * Appends a new row only if no existing row satisfies the given existence predicate.
+     * <p>
+     * The entire read-check-write cycle is performed under an exclusive file lock.
+     * </p>
+     *
+     * @param filePath         path to the CSV file
+     * @param csvHeader        the header line used when rewriting the file
+     * @param existsPredicate  returns {@code true} for a row that should prevent insertion
+     * @param rowFactory       produces the new row given the current row list (including any
+     *                         rows already present)
+     * @return {@code true} if a new row was appended, {@code false} if a matching row already
+     *         exists or an I/O error occurs
+     */
 
     public static boolean appendIfAbsent(String filePath, String csvHeader,
                                          Predicate<String> existsPredicate,
@@ -93,6 +200,16 @@ public class FileManager {
         }
     }
 
+
+    /**
+     * Reads all data rows, applies a transformation, and writes the result back to the file.
+     *
+     * @param filePath    path to the CSV file
+     * @param csvHeader   the header line used when rewriting the file
+     * @param transformer callback that receives a copy of the current rows and returns the
+     *                    updated list to persist
+     */
+
     public static void updateRows(String filePath, String csvHeader, RowTransformer transformer) {
         try {
             withLockedFile(filePath, true, (raf, channel) -> {
@@ -103,10 +220,33 @@ public class FileManager {
         } catch (IOException e) { e.printStackTrace(); }
     }
 
+    /**
+     * Generates the next sequential identifier by scanning all rows in the given file.
+     *
+     * @param filePath path to the CSV file whose rows are scanned
+     * @param prefix   identifier prefix (e.g. {@code "JOB"})
+     * @return the next identifier in the format {@code prefix + zero-padded 3-digit number}
+     * @see #nextId(List, String)
+     */
     public static String generateNextId(String filePath, String prefix) {
         List<String> rows = readAll(filePath);
         return nextId(rows, prefix);
     }
+
+
+    /**
+     * Computes the next sequential identifier from an in-memory list of CSV rows.
+     * <p>
+     * Each row's first comma-separated field is inspected. Fields starting with {@code prefix}
+     * followed by a numeric suffix contribute to the maximum; the returned value is
+     * {@code prefix} concatenated with {@code (max + 1)} formatted as three digits
+     * (e.g. {@code "APP004"}).
+     * </p>
+     *
+     * @param rows   list of CSV data rows (header excluded)
+     * @param prefix the identifier prefix to match and prepend
+     * @return the next identifier string
+     */
 
     public static String nextId(List<String> rows, String prefix) {
         int maxNum = 0;

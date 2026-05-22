@@ -35,6 +35,14 @@ public class ExportHistoryServlet extends HttpServlet {
     private static final String SEP =
             "========================================\n";
 
+    /**
+     * Generates and downloads a human-readable text archive of all application history records.
+     *
+     * @param request  the HTTP GET request; caller must be an authenticated admin
+     * @param response the HTTP response streamed as {@code text/plain} attachment
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if reading CSV files or writing the response fails
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

@@ -2,6 +2,10 @@ userId,username,passwordHash,role,email,securityQuestion,securityAnswer,status
 U001,admin,8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918,ADMIN,admin@bupt.edu.cn,pet,admindog,ACTIVE
 U002,prof_wang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,wang@bupt.edu.cn,city,beijing,ACTIVE
 U003,student_li,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,li@bupt.edu.cn,school,bupt,ACTIVE
+
+U004,student_zhang,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,TA,zhang@bupt.edu.cn,pet,cat,ACTIVE
+U005,prof_chen,5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8,MO,chen@bupt.edu.cn,city,shanghai,ACTIVE
+
 U004,prof_li,008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601,MO,prof_li@email.com,pet,shit,ACTIVE
 U005,student_zhao,008c70392e3abfbd0fa47bbc2ed96aa99bd49e159727fcba0f2e6abeb3a9d601,TA,zhao@bupt.edu.cn,pet,pet,ACTIVE
 U006,vt_ta_1778421718178,d3dec3f35387156495cbc21471313f87155f878f3435b693f50077c2be479033,TA,vt_ta_1778421718178@test.com,pet,cat,ACTIVE
@@ -12,3 +16,4 @@ U010,vt_ta_1778421984582,d3dec3f35387156495cbc21471313f87155f878f3435b693f50077c
 U011,vt_mo_1778421984582,d3dec3f35387156495cbc21471313f87155f878f3435b693f50077c2be479033,MO,vt_mo_1778421984582@test.com,pet,cat,ACTIVE
 U012,preLock_1778421984582,d3dec3f35387156495cbc21471313f87155f878f3435b693f50077c2be479033,TA,preLock_1778421984582@test.com,pet,cat,ACTIVE
 U013,locktest_1778421984582,d3dec3f35387156495cbc21471313f87155f878f3435b693f50077c2be479033,TA,locktest_1778421984582@test.com,pet,cat,ACTIVE
+

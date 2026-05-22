@@ -1,3 +1,8 @@
 userId,studentId,fullName,programme,yearOfStudy,phone,cvFilePath
+
+U003,231220001,Li Student,Computer Science,3,13800138000,
+U004,231220002,Zhang Wei,Software Engineering,2,13900139000,
+
 U003,123456,Lili,IST,Year 2,null,uploads/U003_1776941155546.docx
 U005,2024123456,Zhaotic,IST,Year 2,null,
+

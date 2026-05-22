@@ -18,9 +18,24 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 
+/**
+ * Servlet for Module Organisers to post new TA jobs, edit existing jobs, or close jobs.
+ * <p>
+ * URL mapping: {@code /mo/post-job} via {@link WebServlet}.
+ * GET shows the post/edit form; POST creates, updates, or closes a job.
+ * </p>
+ */
 @WebServlet("/mo/post-job")
 public class PostJobServlet extends HttpServlet {
 
+    /**
+     * Forwards to the job posting form for authenticated MO users.
+     *
+     * @param request  the HTTP request
+     * @param response the HTTP response; forwards to {@code /mo/post-job.jsp}
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding or sending forbidden fails
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User currentUser = SessionUtil.getCurrentUser(request);
@@ -31,6 +46,15 @@ public class PostJobServlet extends HttpServlet {
         request.getRequestDispatcher("/mo/post-job.jsp").forward(request, response);
     }
 
+    /**
+     * Creates a new job, updates an existing job, or closes a job based on form parameters.
+     *
+     * @param request  the HTTP request with job fields; {@code jobId} present for edit/close,
+     *                 {@code action=close} to close without deleting
+     * @param response the HTTP response; redirects to {@code /mo/jobs.jsp} with success or error flags
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting or sending forbidden fails
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User currentUser = SessionUtil.getCurrentUser(request);

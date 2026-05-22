@@ -18,9 +18,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+
+ * Servlet that prepares recruitment progress metrics for the MO progress dashboard.
+ * <p>
+ * URL mapping: {@code /mo/progress} (declared in {@code WEB-INF/web.xml}).
+ * Aggregates per-job applicant counts, review states, fill rates, and overall totals.
+ * </p>
+ */
+public class MoProgressServlet extends HttpServlet {
+
+    /**
+     * Builds progress rows and summary attributes for the current MO's jobs, then forwards to the JSP.
+     *
+     * @param req  the HTTP request; user must be logged in
+     * @param resp the HTTP response; forwards to {@code /mo/progress.jsp} or redirects to login
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if redirecting or forwarding fails
+     */
+
  * Canonical route {@code /mo/progress} prepares recruitment progress metrics for the JSP view.
  */
 public class MoProgressServlet extends HttpServlet {
+
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

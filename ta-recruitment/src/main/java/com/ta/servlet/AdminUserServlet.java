@@ -8,10 +8,31 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+
+/**
+ * Servlet for administrators to list all users and perform account lifecycle actions.
+ * <p>
+ * URL mapping: {@code /admin/users} via {@link WebServlet}.
+ * </p>
+ *
+ * @see UserDAO
+ */
 @WebServlet("/admin/users")
 public class AdminUserServlet extends HttpServlet {
 
-    // 加载用户列表（展示页面）
+    /**
+     * Loads all users and forwards to the admin user management JSP.
+     *
+     * @param req  the HTTP request
+     * @param resp the HTTP response; forwards to {@code /admin/users.jsp}
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding fails
+     */
+
+@WebServlet("/admin/users")
+public class AdminUserServlet extends HttpServlet {
+
+
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String dataDir = SessionUtil.getDataDir(req);
@@ -21,7 +42,17 @@ public class AdminUserServlet extends HttpServlet {
         req.getRequestDispatcher("/admin/users.jsp").forward(req, resp);
     }
 
-    // 处理用户操作（修改状态）点击禁用、激活或删除
+
+    /**
+     * Processes user management actions: suspend, activate, or delete.
+     *
+     * @param req  the HTTP request with parameters {@code action} ({@code suspend},
+     *             {@code activate}, or {@code delete}) and {@code userId}
+     * @param resp the HTTP response; redirects to {@code /admin/users?success=<action>}
+     * @throws ServletException if servlet processing fails
+     * @throws IOException      if redirecting fails
+     */
+
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
@@ -50,4 +81,3 @@ public class AdminUserServlet extends HttpServlet {
 
         resp.sendRedirect(req.getContextPath() + "/admin/users?success=" + action);
     }
-}

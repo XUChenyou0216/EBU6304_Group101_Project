@@ -1,4 +1,6 @@
 notificationId,userId,type,message,isRead,createdDate
+
+
 NTF001,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CV"" (TEST01).",true,2026-05-09
 NTF002,U003,APPLICATION_SUBMITTED,"Your application for ""TA-CS"" (CS301) has been submitted successfully.",true,2026-05-09
 NTF003,U004,APPLICATION_SUBMITTED,"A new application has been received for ""TA-CS"" (CS301).",true,2026-05-09
@@ -43,3 +45,4 @@ NTF041,U003,APPLICATION_SUBMITTED,"Your application for ""Test22222"" (122322) h
 NTF042,U002,APPLICATION_SUBMITTED,"A new application has been received for ""Test22222"" (122322).",true,2026-05-10
 NTF043,U003,STATUS_UPDATED,"Your application for ""Test22222"" (122322) has been updated to: ACCEPTED.",false,2026-05-10
 NTF044,U001,WORKLOAD_ALERT,"Workload alert [TA:U003]: student_li has 80h (limit 48h).",true,2026-05-10
+

@@ -20,10 +20,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
+/**
+ * Servlet for Teaching Assistants to upload a CV file (multipart form).
+ * <p>
+ * URL mapping: {@code /ta/upload-cv} via {@link WebServlet}.
+ * Maximum upload size is 11 MB. Accepted formats are validated by {@link Validator#validateCvFile}.
+ * </p>
+ */
 @WebServlet("/ta/upload-cv")
 @MultipartConfig(maxFileSize = 11 * 1024 * 1024)
 public class UploadCvServlet extends HttpServlet {
 
+    /**
+     * Receives a CV file upload, stores it under {@code uploads/}, and updates the TA profile path.
+     *
+     * @param req  the HTTP multipart request with part name {@code cvFile}
+     * @param resp the HTTP response; redirects to profile JSP with success or error query parameters
+     * @throws ServletException if multipart parsing fails
+     * @throws IOException      if file I/O or redirect fails
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         User user = SessionUtil.getCurrentUser(req);

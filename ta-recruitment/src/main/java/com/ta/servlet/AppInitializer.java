@@ -10,9 +10,23 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import java.io.File;
 
+/**
+ * Application startup listener that prepares the data directory and seeds sample CSV data
+ * when the web application context is initialized.
+ * <p>
+ * Registered via {@link WebListener} and runs once per deployment before servlets handle traffic.
+ * Creates {@code users.csv}, {@code jobs.csv}, {@code profiles.csv}, and {@code applications.csv}
+ * with demo records if missing or empty.
+ * </p>
+ */
 @WebListener
 public class AppInitializer implements ServletContextListener {
 
+    /**
+     * Resolves the data directory, creates upload folders, and seeds default CSV files if needed.
+     *
+     * @param sce the servlet context event supplied on application startup
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         String realPath = sce.getServletContext().getRealPath("/");
@@ -82,6 +96,11 @@ public class AppInitializer implements ServletContextListener {
         System.out.println("[INIT] Data directory ready: " + dataDir);
     }
 
+    /**
+     * Called when the servlet context is destroyed. No teardown actions are performed.
+     *
+     * @param sce the servlet context event supplied on application shutdown
+     */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {}
 }

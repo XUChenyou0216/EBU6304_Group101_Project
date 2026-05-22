@@ -8,9 +8,27 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+/**
+ * Servlet for user authentication: login form display, credential verification, session creation,
+ * and logout.
+ * <p>
+ * URL mappings: {@code /login} and {@code /logout} via {@link WebServlet}.
+ * Implements per-username lockout after repeated failed attempts within the same HTTP session.
+ * </p>
+ *
+ * @see SessionUtil
+ */
 @WebServlet(urlPatterns = {"/login", "/logout"})
 public class LoginServlet extends HttpServlet {
 
+    /**
+     * Handles logout, redirects already-authenticated users to their dashboard, or shows the login page.
+     *
+     * @param req  the HTTP request; servlet path {@code /logout} clears the session
+     * @param resp the HTTP response; redirects or forwards to {@code /login.jsp}
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if redirecting or forwarding fails
+     */
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         if ("/logout".equals(req.getServletPath())) {
@@ -22,6 +40,14 @@ public class LoginServlet extends HttpServlet {
         req.getRequestDispatcher("/login.jsp").forward(req, resp);
     }
 
+    /**
+     * Validates credentials, enforces account lockout and suspension checks, and establishes the session.
+     *
+     * @param req  the HTTP request with {@code username} and {@code password} form fields
+     * @param resp the HTTP response; forwards to login JSP on failure or redirects to role dashboard on success
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if redirecting or forwarding fails
+     */
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession();

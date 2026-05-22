@@ -8,14 +8,39 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
+/**
+ * Servlet for new user self-registration with role, email, and security question fields.
+ * <p>
+ * URL mapping: {@code /register} via {@link WebServlet}.
+ * </p>
+ *
+ * @see UserDAO#saveIfUsernameAvailable(User)
+ */
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
 
+    /**
+     * Displays the registration form.
+     *
+     * @param req  the HTTP request
+     * @param resp the HTTP response; forwards to {@code /register.jsp}
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if forwarding fails
+     */
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         req.getRequestDispatcher("/register.jsp").forward(req, resp);
     }
 
+    /**
+     * Validates registration input, creates a new active user, and redirects to login on success.
+     *
+     * @param req  the HTTP request with username, password, confirmPassword, role, email,
+     *             securityQuestion, and securityAnswer parameters
+     * @param resp the HTTP response; forwards to register JSP on validation failure or redirects to login
+     * @throws ServletException if the request dispatcher fails
+     * @throws IOException      if redirecting or forwarding fails
+     */
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         String username = req.getParameter("username");
