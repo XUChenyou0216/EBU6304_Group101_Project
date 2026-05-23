@@ -150,7 +150,6 @@ public class UserDAO {
      *
      * @return the next id string (for example {@code U001})
      */
-main
     public String generateNextId() {
         return FileManager.generateNextId(filePath, "U");
     }
