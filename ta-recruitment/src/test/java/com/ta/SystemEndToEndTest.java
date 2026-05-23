@@ -38,25 +38,12 @@ import java.util.Optional;
 
 import static org.junit.Assert.*;
 
-/**
- * End-to-end system tests using an embedded Tomcat server and HtmlUnit browser automation.
- *
- * <p>These tests verify complete user journeys across registration, login, job posting,
- * TA profile management, job browsing, application submission, and admin export endpoints.
- * The web application is deployed from a copied {@code src/main/webapp} tree with compiled
- * classes mounted under {@code WEB-INF/classes}.</p>
- */
 public class SystemEndToEndTest {
     private static Tomcat tomcat;
     private static String baseUrl;
     private WebClient webClient;
     private static File webappRoot;
 
-    /**
-     * Starts an embedded Tomcat instance on a random port and deploys the test webapp copy.
-     *
-     * @throws Exception if webapp preparation or server startup fails
-     */
     @BeforeClass
     public static void startEmbeddedServer() throws Exception {
         prepareWebappCopy();
@@ -80,11 +67,6 @@ public class SystemEndToEndTest {
         baseUrl = "http://localhost:" + port;
     }
 
-    /**
-     * Stops and destroys the embedded Tomcat server after all tests complete.
-     *
-     * @throws Exception if server shutdown fails
-     */
     @AfterClass
     public static void stopEmbeddedServer() throws Exception {
         if (tomcat != null) {
@@ -93,9 +75,6 @@ public class SystemEndToEndTest {
         }
     }
 
-    /**
-     * Creates a fresh HtmlUnit {@link WebClient} before each test method.
-     */
     @Before
     public void setUp() {
         webClient = new WebClient(BrowserVersion.CHROME);
@@ -105,9 +84,6 @@ public class SystemEndToEndTest {
         webClient.getOptions().setRedirectEnabled(true);
     }
 
-    /**
-     * Closes the HtmlUnit {@link WebClient} after each test method.
-     */
     @After
     public void tearDown() {
         if (webClient != null) {
@@ -115,14 +91,6 @@ public class SystemEndToEndTest {
         }
     }
 
-    /**
-     * Exercises the primary TA recruitment flow: MO posts a job, TA completes a profile,
-     * browses open positions, and submits an application.
-     *
-     * <p>Verifies redirect URLs and page content at each step of the journey.</p>
-     *
-     * @throws Exception if browser interaction or page navigation fails
-     */
     @Test
     public void testSystemEndToEndFlow() throws Exception {
         String taUsername = "system_ta_" + System.currentTimeMillis();
@@ -158,13 +126,6 @@ public class SystemEndToEndTest {
         assertTrue(applicationResult.getUrl().toString().contains("/ta/applications.jsp?success=applied"));
         assertTrue(applicationResult.getBody().getTextContent().contains("My Applications") || applicationResult.getBody().getTextContent().contains("Application"));
     }
-
-    /**
-     * Verifies that an authenticated admin can access allocation CSV and history
-     * archive TXT export endpoints with expected HTTP status and content types.
-     *
-     * @throws Exception if login or export HTTP requests fail
-     */
     @Test
     public void testAdminExportButtons() throws Exception {
         // 用 admin 账号登录
@@ -209,14 +170,6 @@ public class SystemEndToEndTest {
         }
         Files.createDirectories(target);
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-            /**
-             * Creates the mirrored directory tree for the embedded Tomcat webapp copy.
-             *
-             * @param dir   source directory being entered
-             * @param attrs directory attributes supplied by the walk
-             * @return {@link FileVisitResult#CONTINUE} to descend into child directories
-             * @throws IOException if the target directory cannot be created
-             */
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 Path targetDir = target.resolve(source.relativize(dir));
@@ -224,14 +177,6 @@ public class SystemEndToEndTest {
                 return FileVisitResult.CONTINUE;
             }
 
-            /**
-             * Copies each source webapp file into the system-test deployment directory.
-             *
-             * @param file  path to the source file being visited
-             * @param attrs file attributes supplied by the directory walk
-             * @return {@link FileVisitResult#CONTINUE} to process remaining files
-             * @throws IOException if the file cannot be copied
-             */
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Path targetFile = target.resolve(source.relativize(file));
@@ -332,28 +277,12 @@ public class SystemEndToEndTest {
 
     private static void deleteRecursively(Path path) throws IOException {
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-            /**
-             * Deletes each visited file while recursively removing a temporary directory.
-             *
-             * @param file  path to the file being visited
-             * @param attrs file attributes supplied by the directory walk
-             * @return {@link FileVisitResult#CONTINUE} to continue traversal
-             * @throws IOException if the file cannot be deleted
-             */
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
 
-            /**
-             * Deletes each directory after its contents have been visited.
-             *
-             * @param dir path to the directory being visited
-             * @param exc I/O exception raised while visiting this directory, or {@code null}
-             * @return {@link FileVisitResult#CONTINUE} to continue traversal
-             * @throws IOException if the directory cannot be deleted or if {@code exc} is non-null
-             */
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
                 Files.delete(dir);

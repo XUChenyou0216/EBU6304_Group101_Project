@@ -20,18 +20,6 @@ import java.io.IOException;
 @WebServlet("/admin/users")
 public class AdminUserServlet extends HttpServlet {
 
-    /**
-     * Loads all users and forwards to the admin user management JSP.
-     *
-     * @param req  the HTTP request
-     * @param resp the HTTP response; forwards to {@code /admin/users.jsp}
-     * @throws ServletException if the request dispatcher fails
-     * @throws IOException      if forwarding fails
-     */
-
-@WebServlet("/admin/users")
-public class AdminUserServlet extends HttpServlet {
-
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -81,3 +69,5 @@ public class AdminUserServlet extends HttpServlet {
 
         resp.sendRedirect(req.getContextPath() + "/admin/users?success=" + action);
     }
+
+}

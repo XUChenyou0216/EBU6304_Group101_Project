@@ -79,7 +79,7 @@ public class AIWorkloadServlet extends HttpServlet {
          * @param fromNewHours     estimated hours after change for source TA
          * @param toCurrentHours   estimated hours before change for target TA
          * @param toNewHours       estimated hours after change for target TA
-         * @param confidence       recommendation confidence score (0–100)
+         * @param confidence       recommendation confidence score (0-?00)
          * @param reasoning        explanation text from AI or rule engine
          */
 
@@ -140,19 +140,6 @@ public class AIWorkloadServlet extends HttpServlet {
      * @throws IOException      if forwarding or sending forbidden fails
      */
 
-        public String getApplicationId()  { return applicationId; }
-        public String getFromTaId()       { return fromTaId; }
-        public String getFromTaName()     { return fromTaName; }
-        public String getToTaId()         { return toTaId; }
-        public String getToTaName()       { return toTaName; }
-        public String getJobLabel()       { return jobLabel; }
-        public int getFromCurrentHours()  { return fromCurrentHours; }
-        public int getFromNewHours()      { return fromNewHours; }
-        public int getToCurrentHours()    { return toCurrentHours; }
-        public int getToNewHours()        { return toNewHours; }
-        public int getConfidence()        { return confidence; }
-        public String getReasoning()      { return reasoning; }
-    }
 
 
     @Override
@@ -204,7 +191,7 @@ public class AIWorkloadServlet extends HttpServlet {
             overloadedRows.add(new AdminWorkloadServlet.TaWorkloadRow(
                     ta.getUserId(), ta.getUsername(), displayName(p, ta),
                     taApps.get(ta.getUserId()).size(),
-                    labels.isEmpty() ? "—" : String.join(", ", labels),
+                    labels.isEmpty() ? "-" : String.join(", ", labels),
                     hrs, hrs > AdminWorkloadServlet.WORKLOAD_LIMIT_HOURS));
         }
 
@@ -303,7 +290,7 @@ public class AIWorkloadServlet extends HttpServlet {
         sb.append("Policy: each accepted assignment = ").append(hpa)
           .append(" hrs estimated work. The limit is ").append(limit).append(" hrs per TA.\n\n");
 
-        sb.append("OVERLOADED TAs (above ").append(limit).append(" hrs) — need reassignment:\n");
+        sb.append("OVERLOADED TAs (above ").append(limit).append(" hrs) -?need reassignment:\n");
         for (User ta : allTas) {
             int hrs = taHours.get(ta.getUserId());
             if (hrs <= limit) continue;
@@ -328,7 +315,7 @@ public class AIWorkloadServlet extends HttpServlet {
               .append(" hrs spare\n");
             anyAvailable = true;
         }
-        if (!anyAvailable) sb.append("(none — consider recruiting additional TAs)\n");
+        if (!anyAvailable) sb.append("(none -?consider recruiting additional TAs)\n");
 
         sb.append("\nRecommend which assignments to transfer to reduce overloaded TAs to below the limit.\n");
         sb.append("Return ONLY a valid JSON array (no markdown, no extra text):\n");
@@ -465,7 +452,7 @@ public class AIWorkloadServlet extends HttpServlet {
         if (job == null) return fallbackJobId;
         String code = job.getModuleCode() != null ? job.getModuleCode().trim() : "";
         String name = job.getModuleName() != null ? job.getModuleName().trim() : "";
-        if (!code.isEmpty() && !name.isEmpty()) return code + " — " + name;
+        if (!code.isEmpty() && !name.isEmpty()) return code + " -?" + name;
         if (!name.isEmpty()) return name;
         if (!code.isEmpty()) return code;
         return fallbackJobId;

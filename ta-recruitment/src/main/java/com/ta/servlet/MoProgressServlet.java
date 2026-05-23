@@ -27,19 +27,6 @@ import java.util.List;
  */
 public class MoProgressServlet extends HttpServlet {
 
-    /**
-     * Builds progress rows and summary attributes for the current MO's jobs, then forwards to the JSP.
-     *
-     * @param req  the HTTP request; user must be logged in
-     * @param resp the HTTP response; forwards to {@code /mo/progress.jsp} or redirects to login
-     * @throws ServletException if the request dispatcher fails
-     * @throws IOException      if redirecting or forwarding fails
-     */
-
- * Canonical route {@code /mo/progress} prepares recruitment progress metrics for the JSP view.
- */
-public class MoProgressServlet extends HttpServlet {
-
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

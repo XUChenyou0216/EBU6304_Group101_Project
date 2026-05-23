@@ -15,16 +15,6 @@ import java.util.Properties;
 public class ConfigDAO {
     private final String configPath;
 
-    /**
-     * Creates a configuration accessor for the given data directory.
-     *
-     * @param dataDir absolute or relative path to the data directory; the properties file
-     *                is expected at {@code {dataDir}/config.properties}
-     */
-
-public class ConfigDAO {
-    private final String configPath;
-
 
     public ConfigDAO(String dataDir) {
         this.configPath = dataDir + "/config.properties";

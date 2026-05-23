@@ -28,35 +28,6 @@ public class FileManager {
 
 
     /**
-     * Functional interface for constructing a new CSV row when a generated identifier is available.
-     *
-     * @see #appendWithGeneratedId(String, String, String, RowFactory)
-     */
-    @FunctionalInterface
-    public interface RowFactory {
-        /**
-         * Creates a CSV row string using the supplied generated identifier.
-         *
-         * @param generatedId the newly allocated row identifier (e.g. {@code "APP001"})
-         * @return the complete CSV row to append, without a trailing line separator
-         */
-        String create(String generatedId);
-    }
-
-    /**
-     * Functional interface for transforming the full list of CSV data rows in place.
-     *
-     * @see #updateRows(String, String, RowTransformer)
-     */
-    @FunctionalInterface
-    public interface RowTransformer {
-        /**
-         * Transforms the current list of CSV data rows.
-         *
-         * @param rows a mutable copy of all data rows (header excluded); may be modified or replaced
-         * @return the list of rows to persist back to the file
-         */
-        List<String> transform(List<String> rows);
     }
 
     /**

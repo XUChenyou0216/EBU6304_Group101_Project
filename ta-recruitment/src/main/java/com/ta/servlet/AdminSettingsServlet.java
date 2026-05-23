@@ -22,17 +22,6 @@ import java.io.IOException;
  */
 public class AdminSettingsServlet extends HttpServlet {
 
-    /**
-     * Displays the admin settings page with current AI provider, model, base URL, and a masked API key.
-     *
-     * @param req  the HTTP request; may include query parameter {@code saved=1} after a successful save
-     * @param resp the HTTP response; forwards to {@code /admin/settings.jsp} on success
-     * @throws ServletException if the request dispatcher fails
-     * @throws IOException      if forwarding or sending an error response fails
-     */
-
-public class AdminSettingsServlet extends HttpServlet {
-
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
